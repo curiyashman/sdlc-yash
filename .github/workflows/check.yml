@@ -1,0 +1,23 @@
+name: check
+on:
+  push:
+    branches: [main]
+  pull_request:
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Built skills match source
+        run: python source/build.py --check
+      - name: Script tests (without PyYAML)
+        run: PDLC_NO_YAML=1 python -m unittest discover tests
+      - name: Script tests (with PyYAML)
+        run: |
+          pip install pyyaml
+          python -m unittest discover tests
+      - name: Lint the sample product
+        run: python tools/pdlc.py lint --root examples/sample-product/docs/pdlc

@@ -1,0 +1,22 @@
+# GitHub Actions workflow: copy to .github/workflows/pdlc-lint.yml in the repository that holds the product's docs.
+# Replace docs/pdlc with the product's docs path if it differs. The script is copied there by product-00 or dev-00.
+name: pdlc-lint
+on:
+  pull_request:
+    paths: ["docs/pdlc/**"]
+  push:
+    branches: [main]
+    paths: ["docs/pdlc/**"]
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pyyaml
+      - name: Lint PDLC docs
+        run: python docs/pdlc/.pdlc/pdlc.py lint --root docs/pdlc

@@ -1,0 +1,65 @@
+# tracker.yaml: the tracking data for this product. tracker.md is generated from it (python pdlc.py board).
+product: Ledgerly (sample)
+config:
+  design_stage: true
+  version_scheme: semver
+  statuses:
+    backlog: Backlog
+    in_definition: In definition
+    in_design: In design
+    ready_for_dev: Ready for dev
+    in_progress: In progress
+    in_review: In review
+    in_qa: In QA
+    done: Done
+    released: Released
+    blocked: Blocked
+    removed: Removed
+initiatives:
+  - id: I-001
+    title: Bulk invoicing
+    slug: bulk-invoicing
+    status: in_progress
+    scopes:
+      - id: M01.S02
+        na: {D02: "no data change"}
+items:
+  - {id: M01, type: module, title: Billing, status: released}
+  - {id: M01.S01, type: sub-module, parent: M01, title: Invoices, status: released}
+  - {id: M01.S01.F01, type: feature, parent: M01.S01, title: Create invoice, status: released}
+  - {id: M01.S01.F02, type: feature, parent: M01.S01, title: Invoice list, status: released, initiative: [I-001]}
+  - {id: M01.S02, type: sub-module, parent: M01, title: Bulk actions, status: in_progress, initiative: [I-001], source: product/I-001-bulk-invoicing/02-prd.md, dep_level: 0}
+  - {id: M01.S02.F01, type: feature, parent: M01.S02, title: Bulk send, status: in_progress, initiative: [I-001], source: product/I-001-bulk-invoicing/02-prd.md, dep_level: 0}
+  - id: M01.S02.F01-US01
+    type: story
+    parent: M01.S02.F01
+    initiative: [I-001]
+    scope: M01.S02
+    title: Select draft invoices
+    status: in_review
+    depends_on: []
+    dep_level: 0
+    source: product/I-001-bulk-invoicing/04-stories/M01.S02-bulk-actions.md
+  - id: M01.S02.F01-US02
+    type: story
+    parent: M01.S02.F01
+    initiative: [I-001]
+    scope: M01.S02
+    title: Send selected invoices
+    status: ready_for_dev
+    depends_on: [M01.S02.F01-US01]
+    dep_level: 1
+    fix_version: v1.4.0
+    source: product/I-001-bulk-invoicing/04-stories/M01.S02-bulk-actions.md
+  - {id: TD-001, type: tech_debt, title: Invoice list query does a full scan, status: backlog, source: decisions/DEC-001-background-jobs.md, dep_level: 0}
+queries:
+  - id: Q-001
+    question: Can a bulk send include invoices of several currencies?
+    about: [M01.S02.F01-US02]
+    raised_by: D01
+    blocking: false
+    status: answered
+    answer: product/I-001-bulk-invoicing/02-prd.md@1.2.0
+versions:
+  - {id: v1.4.0, goal: Bulk send, status: planned}
+change_requests: []
