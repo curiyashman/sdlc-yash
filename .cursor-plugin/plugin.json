@@ -1,0 +1,22 @@
+{
+  "name": "pdlc-skills",
+  "version": "1.0.0",
+  "description": "PDLC Agent Skills for product, design, development, QA, deployment, and security — idea to ship with a shared tracker and lint script. Install once at Cursor user scope; each product keeps its own docs/pdlc.",
+  "author": {
+    "name": "Yash Patel"
+  },
+  "homepage": "https://github.com/curiyashman/sdlc-yash",
+  "repository": "https://github.com/curiyashman/sdlc-yash",
+  "keywords": [
+    "pdlc",
+    "product",
+    "design",
+    "development",
+    "qa",
+    "deployment",
+    "security",
+    "agent-skills",
+    "cursor"
+  ],
+  "skills": "skills"
+}

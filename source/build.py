@@ -1,8 +1,12 @@
 #!/usr/bin/env python3
 """Builds the installable skills from source/.
 
-  python source/build.py          write Product/, Design/, Development/, QA/, Deployment/, Security/, Common/
+  python source/build.py          write team folders + flat skills/ (for Cursor / Agent plugins)
   python source/build.py --check  fail if the built folders differ from source (used by CI)
+
+Writes:
+  Product/, Design/, Development/, QA/, Deployment/, Security/, Common/
+  skills/<name>/                  flat copy of every skill (plugin discovery)
 
 Each skill folder gets:
   SKILL.md                    source/skills/<name>.md with {{CORE}} replaced by
@@ -22,6 +26,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
 TEAMS = {"product-": "Product", "design-": "Design", "dev-": "Development", "qa-": "QA",
          "deploy-": "Deployment", "sec-": "Security", "pdlc-": "Common"}
+SKILLS_DIR = "skills"
 PACKS = {
     "compliance.md": ["product-00-product-context", "product-02-prd", "product-04-user-stories",
                       "design-04-design-system", "dev-01-tech-design", "dev-05-test-qa", "qa-01-test-plan",
@@ -110,6 +115,14 @@ def build(out):
         if os.path.exists(p):
             os.makedirs(os.path.dirname(os.path.join(out, dst)), exist_ok=True)
             shutil.copyfile(p, os.path.join(out, dst))
+    # Flat skills/ for Cursor Plugin and Agent Plugin discovery (install once at user root).
+    skills_root = os.path.join(out, SKILLS_DIR)
+    if os.path.isdir(skills_root):
+        shutil.rmtree(skills_root)
+    os.makedirs(skills_root, exist_ok=True)
+    for name in names:
+        team = next(v for k, v in TEAMS.items() if name.startswith(k))
+        shutil.copytree(os.path.join(out, team, name), os.path.join(skills_root, name))
     # every skill named in a SKILL.md must exist
     for team in set(TEAMS.values()):
         for dp, _, fns in os.walk(os.path.join(out, team)):
@@ -123,8 +136,10 @@ def build(out):
 
 def tree(root):
     out = {}
-    for team in set(TEAMS.values()):
+    for team in list(TEAMS.values()) + [SKILLS_DIR]:
         base = os.path.join(root, team)
+        if not os.path.isdir(base):
+            continue
         for dp, _, fns in os.walk(base):
             for fn in fns:
                 p = os.path.join(dp, fn)
@@ -147,7 +162,7 @@ def main():
                 problems.append(f"out of date (run build): {rel}")
         shutil.rmtree(tmp)
     else:
-        for team in set(TEAMS.values()):
+        for team in list(TEAMS.values()) + [SKILLS_DIR]:
             p = os.path.join(REPO, team)
             if os.path.isdir(p):
                 shutil.rmtree(p)
@@ -156,6 +171,7 @@ def main():
             team = next(v for k, v in TEAMS.items() if n.startswith(k))
             size = os.path.getsize(os.path.join(REPO, team, n, "SKILL.md"))
             print(f"{team:12} {n:32} SKILL.md {size:6} bytes")
+        print(f"skills/     {len(names)} flat skill folders (plugin layout)")
     for p in problems:
         print("PROBLEM", p)
     print(f"{len(names)} skills, {len(problems)} problems")

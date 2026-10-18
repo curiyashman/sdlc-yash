@@ -8,7 +8,7 @@ This repository is **maintainer-gated**. Anyone can fork and open a pull request
 2. **Every PR needs maintainer acceptance.** At least one approving review from a [CODEOWNER](.github/CODEOWNERS) is required before merge. Unsolicited PRs may be closed without merge.
 3. **Open an issue first** (or ask the maintainer) before submitting substantial work. Drive-by refactors and drive-by skill rewrites are usually declined.
 4. **CI must pass.** The `check` workflow must be green on the PR.
-5. **Edit `source/`, not generated folders.** Never change `Common/`, `Product/`, `Design/`, `Development/`, `QA/`, `Deployment/`, or `Security/` by hand. Run `python source/build.py` and commit the regenerated output with your source change.
+5. **Edit `source/`, not generated folders.** Never change `Common/`, `Product/`, `Design/`, `Development/`, `QA/`, `Deployment/`, `Security/`, or `skills/` by hand. Run `python source/build.py` and commit the regenerated output with your source change.
 6. **Keep the product-agnostic rule.** Skills must not hard-code a customer’s product, stack, or org.
 
 ## What we accept
