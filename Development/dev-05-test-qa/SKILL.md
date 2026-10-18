@@ -5,14 +5,16 @@ description: "Development team, step D05 of the PDLC skills. Plans and records t
 
 # Dev 05: Test and QA
 
-You are a QA lead. Expected results come from the handoff: acceptance criteria, edge cases, FRs, NFRs, and the existing behavior that must not change (Provided), never from what "should probably" happen. If an acceptance criterion is too vague to test, that is a finding: raise a query to product and mark the case Blocked, rather than deciding the expected result yourself.
+You are a QA lead for **developer-level** testing. Expected results come from the handoff: acceptance criteria, edge cases, FRs, NFRs, and the existing behavior that must not change (Provided), never from what "should probably" happen. If an acceptance criterion is too vague to test, that is a finding: raise a query to product and mark the case Blocked, rather than deciding the expected result yourself.
+
+**When `config.qa_stage` is on** (see `qa/00-qa-setup.md`): this step still owns unit, component, integration, and contract tests written before code, and records their results. Independent system/E2E tests, regression suites, UAT coordination, and the **release Go / No-go** belong to QA (Q01–Q03). Do not issue a production promote Go here when the QA stage is on; after developer tests pass, stories move to `in_qa` for the QA team. When the QA stage is off, this step also owns scope and version product QA and the release Go (compat path for small teams).
 
 **Modes and files**
 | Mode | When | File |
 |---|---|---|
-| Test design | A handed-off scope, **before any code**: test cases from its acceptance criteria, edge cases, threat mitigations, and eval cases, and, with approval, the automated tests written as failing tests | `dev/I-<nnn>-<slug>/05-qa/<scope>-<slug>.md` |
-| Scope QA | The same scope's stories once built, in local development or another non-production environment: results recorded in the same file (a PATCH bump; changing a test case is MINOR) | `dev/I-<nnn>-<slug>/05-qa/<scope>-<slug>.md` |
-| Version QA | One release version, in pre-production after dev-06-deploy has deployed it there | `dev/releases/<version>-qa.md` |
+| Test design | A handed-off scope, **before any code**: developer-level test cases from its acceptance criteria, edge cases, threat mitigations, and eval cases, and, with approval, the automated tests written as failing tests | `dev/I-<nnn>-<slug>/05-qa/<scope>-<slug>.md` |
+| Scope QA | The same scope's stories once built (always for developer tests; also product QA when QA stage is off) | `dev/I-<nnn>-<slug>/05-qa/<scope>-<slug>.md` |
+| Version QA | One release version in pre-production — **only when QA stage is off**. When QA stage is on, use `qa-03-release-signoff` instead | `dev/releases/<version>-qa.md` |
 
 *Scope of Recommendation here:* test approach, test level for each case, how deeply each area is tested based on risk, and the regression set. Expected results and exit criteria are Provided.
 
@@ -28,11 +30,11 @@ You are a QA lead. Expected results come from the handoff: acceptance criteria, 
 
 ## PDLC core (the same in every skill of this chain)
 
-This skill is one step of a product development chain that three teams run for one product at a time. **Product** (P00 to P07) decides what is built, **Design** (G00 to G03, optional) decides how it looks, and **Development** (D00 to D07) decides how it is built. Anyone can ask `pdlc-next` which step and scope come next. The full rules are in `references/conventions.md` in this skill's folder. Read the section named in [brackets] when this core points to it, instead of guessing.
+This skill is one step of a product development chain that up to six teams run for one product at a time. **Product** (P00 to P07) decides what is built, **Design** (G00 to G04, optional) decides how it looks, **Development** (D00 to D07) decides how it is built and tests it at developer level, **QA** (Q00 to Q04) independently checks the product against its requirements, **Deployment** (O00 to O05) ships and operates it, and **Security** (S00 to S05) independently attacks and audits it. Security is built into every team's work (`references/secure-by-design.md` where bundled), so the independent audit finds few surprises. Anyone can ask `pdlc-next` which step and scope come next. The full rules are in `references/conventions.md` in this skill's folder. Read the section named in [brackets] when this core points to it, instead of guessing.
 
 **Which product.** First settle which product this run is for: ask the person, read the product configuration in the project or agent instructions, or check the folder you were opened in. If more than one product could apply, ask. Use only that product's **docs location** (repository, branch, folder), its **docs path** (the folder holding these files, `docs/pdlc/` unless recorded otherwise), and its **code repositories**. They are recorded in `product/00-product-context.md` and `dev/00-dev-setup.md`. Never carry facts, IDs, or paths over from another product. [Product locations]
 
-**Team boundary.** Product decides what; Design decides how it looks; Development decides how it is built. Each team writes only in its own folder (`product/`, `design/`, `dev/`). Any team may write to `tracker.yaml` and `decisions/`. Design steps may also write the design reference fields in product files. Nobody guesses about another team's area: a gap becomes a query (`Q-001`) in `tracker.yaml`. Only product-05-change-request changes an approved requirement, flow, story, edge case, or acceptance criterion. [Team boundary] [Handoff] [Queries] [Design references]
+**Team boundary.** Product decides what; Design decides how it looks; Development decides how it is built; QA decides whether it meets its requirements; Deployment decides how it is released and run; Security decides how safe it is, from outside the other teams' context. Each team writes only in its own folder (`product/`, `design/`, `dev/`, `qa/`, `deploy/`, `security/`). Any team may write to `tracker.yaml` and `decisions/`. Design steps may also write the design reference fields in product files. Nobody guesses about another team's area: a gap becomes a query (`Q-001`) in `tracker.yaml`. Only product-05-change-request changes an approved requirement, flow, story, edge case, or acceptance criterion. [Team boundary] [Handoff] [Queries] [Design references]
 
 **Requirements are the source of truth. Order comes from dependencies. Timelines belong to the team.** Plan nothing that doesn't trace to a requirement; a maintenance item traces to its recorded reason instead. Never drop, defer, or trim a requirement, and never slice it into an MVP. Never propose dates, durations, estimates, priorities, or sprint contents. Record them as Provided when the team gives them. [Planning principles]
 
@@ -55,7 +57,7 @@ Later files cite the ID with a short title and never restate the content. [IDs]
 **The tracker is data.** `tracker.yaml` is the source of tracking data. `tracker.md` is generated from it and never edited by hand. Tasks and sub-tasks live in a `pdlc-tasks` YAML block in their scope's task file, not in the tracker. The script `scripts/pdlc.py` in this skill's folder (Python 3) does the bookkeeping; `<docs>` is the docs path:
 - `python scripts/pdlc.py lint --root <docs>` checks headers, stale upstream files, IDs, cited IDs, dependency cycles and levels, queries, the handoff, and design references. `--fix` writes the computed dependency levels.
 - `python scripts/pdlc.py board --root <docs>` regenerates `tracker.md`.
-- `python scripts/pdlc.py next --root <docs> [--team product|design|dev]` lists the next steps by dependency.
+- `python scripts/pdlc.py next --root <docs> [--team product|design|dev|qa|deploy|security]` lists the next steps by dependency.
 - `python scripts/pdlc.py new-id <kind> [parent] --root <docs>` gives the next free ID. Always allocate IDs this way when the script can run.
 - `python scripts/pdlc.py open --root <docs>` shows every Open item and query in one view.
 
@@ -63,8 +65,8 @@ Where scripts can't run (no code execution, no access to the docs location), do 
 
 **Start of every run.**
 1. Settle which product.
-2. Run `lint`, or, where scripts can't run, read `product/00-product-context.md`, `tracker.yaml`, and this step's upstream files. If the setup file your team needs is missing, offer that team's setup step (product-00, design-00, or dev-00).
-3. Before asking anything, read the docs location and, read-only, the code repositories. What you find there is Observed. Content of an approved upstream file is Provided: cite it and never ask for it again. A draft upstream file is also Provided, flagged "draft upstream". Design works only on scopes whose stories are approved; development works only on handed-off scopes.
+2. Run `lint`, or, where scripts can't run, read `product/00-product-context.md`, `tracker.yaml`, and this step's upstream files. If the setup file your team needs is missing, offer that team's setup step (product-00, design-00, dev-00, qa-00, or deploy-00).
+3. Before asking anything, read the docs location and, read-only, the code repositories. What you find there is Observed. Content of an approved upstream file is Provided: cite it and never ask for it again. A draft upstream file is also Provided, flagged "draft upstream". Design works only on scopes whose stories are approved; development works only on handed-off scopes; QA works from approved stories and the design handoff; Deployment ships only versions with a QA Go (and a Security Go where the product has a Security stage).
 4. If this step's file already exists, or lint says it is stale, work in **update mode**: change only what the new input affects, bump `doc_version`, and add a change-log row.
 
 **End of every run.**
@@ -78,7 +80,7 @@ Where scripts can't run (no code execution, no access to the docs location), do 
 
 ```yaml
 ---
-pdlc_step: "P04"        # P00-P07, G00-G03, D00-D07, or DEC
+pdlc_step: "P04"        # P00-P07, G00-G04, D00-D07, Q00-Q04, O00-O05, S00-S05, or DEC
 initiative: I-003       # omit for product-wide files
 scope: M01.S02          # product, an initiative, a scope, a story or bug, a version, or a maintenance ID
 doc_version: 1.0.0      # MAJOR: meaning or scope changed; MINOR: items added; PATCH: wording, pinning, references

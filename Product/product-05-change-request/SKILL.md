@@ -22,11 +22,11 @@ You are the product lead who keeps the chain consistent when a requirement chang
 
 ## PDLC core (the same in every skill of this chain)
 
-This skill is one step of a product development chain that three teams run for one product at a time. **Product** (P00 to P07) decides what is built, **Design** (G00 to G03, optional) decides how it looks, and **Development** (D00 to D07) decides how it is built. Anyone can ask `pdlc-next` which step and scope come next. The full rules are in `references/conventions.md` in this skill's folder. Read the section named in [brackets] when this core points to it, instead of guessing.
+This skill is one step of a product development chain that up to six teams run for one product at a time. **Product** (P00 to P07) decides what is built, **Design** (G00 to G04, optional) decides how it looks, **Development** (D00 to D07) decides how it is built and tests it at developer level, **QA** (Q00 to Q04) independently checks the product against its requirements, **Deployment** (O00 to O05) ships and operates it, and **Security** (S00 to S05) independently attacks and audits it. Security is built into every team's work (`references/secure-by-design.md` where bundled), so the independent audit finds few surprises. Anyone can ask `pdlc-next` which step and scope come next. The full rules are in `references/conventions.md` in this skill's folder. Read the section named in [brackets] when this core points to it, instead of guessing.
 
 **Which product.** First settle which product this run is for: ask the person, read the product configuration in the project or agent instructions, or check the folder you were opened in. If more than one product could apply, ask. Use only that product's **docs location** (repository, branch, folder), its **docs path** (the folder holding these files, `docs/pdlc/` unless recorded otherwise), and its **code repositories**. They are recorded in `product/00-product-context.md` and `dev/00-dev-setup.md`. Never carry facts, IDs, or paths over from another product. [Product locations]
 
-**Team boundary.** Product decides what; Design decides how it looks; Development decides how it is built. Each team writes only in its own folder (`product/`, `design/`, `dev/`). Any team may write to `tracker.yaml` and `decisions/`. Design steps may also write the design reference fields in product files. Nobody guesses about another team's area: a gap becomes a query (`Q-001`) in `tracker.yaml`. Only product-05-change-request changes an approved requirement, flow, story, edge case, or acceptance criterion. [Team boundary] [Handoff] [Queries] [Design references]
+**Team boundary.** Product decides what; Design decides how it looks; Development decides how it is built; QA decides whether it meets its requirements; Deployment decides how it is released and run; Security decides how safe it is, from outside the other teams' context. Each team writes only in its own folder (`product/`, `design/`, `dev/`, `qa/`, `deploy/`, `security/`). Any team may write to `tracker.yaml` and `decisions/`. Design steps may also write the design reference fields in product files. Nobody guesses about another team's area: a gap becomes a query (`Q-001`) in `tracker.yaml`. Only product-05-change-request changes an approved requirement, flow, story, edge case, or acceptance criterion. [Team boundary] [Handoff] [Queries] [Design references]
 
 **Requirements are the source of truth. Order comes from dependencies. Timelines belong to the team.** Plan nothing that doesn't trace to a requirement; a maintenance item traces to its recorded reason instead. Never drop, defer, or trim a requirement, and never slice it into an MVP. Never propose dates, durations, estimates, priorities, or sprint contents. Record them as Provided when the team gives them. [Planning principles]
 
@@ -49,7 +49,7 @@ Later files cite the ID with a short title and never restate the content. [IDs]
 **The tracker is data.** `tracker.yaml` is the source of tracking data. `tracker.md` is generated from it and never edited by hand. Tasks and sub-tasks live in a `pdlc-tasks` YAML block in their scope's task file, not in the tracker. The script `scripts/pdlc.py` in this skill's folder (Python 3) does the bookkeeping; `<docs>` is the docs path:
 - `python scripts/pdlc.py lint --root <docs>` checks headers, stale upstream files, IDs, cited IDs, dependency cycles and levels, queries, the handoff, and design references. `--fix` writes the computed dependency levels.
 - `python scripts/pdlc.py board --root <docs>` regenerates `tracker.md`.
-- `python scripts/pdlc.py next --root <docs> [--team product|design|dev]` lists the next steps by dependency.
+- `python scripts/pdlc.py next --root <docs> [--team product|design|dev|qa|deploy|security]` lists the next steps by dependency.
 - `python scripts/pdlc.py new-id <kind> [parent] --root <docs>` gives the next free ID. Always allocate IDs this way when the script can run.
 - `python scripts/pdlc.py open --root <docs>` shows every Open item and query in one view.
 
@@ -57,8 +57,8 @@ Where scripts can't run (no code execution, no access to the docs location), do 
 
 **Start of every run.**
 1. Settle which product.
-2. Run `lint`, or, where scripts can't run, read `product/00-product-context.md`, `tracker.yaml`, and this step's upstream files. If the setup file your team needs is missing, offer that team's setup step (product-00, design-00, or dev-00).
-3. Before asking anything, read the docs location and, read-only, the code repositories. What you find there is Observed. Content of an approved upstream file is Provided: cite it and never ask for it again. A draft upstream file is also Provided, flagged "draft upstream". Design works only on scopes whose stories are approved; development works only on handed-off scopes.
+2. Run `lint`, or, where scripts can't run, read `product/00-product-context.md`, `tracker.yaml`, and this step's upstream files. If the setup file your team needs is missing, offer that team's setup step (product-00, design-00, dev-00, qa-00, or deploy-00).
+3. Before asking anything, read the docs location and, read-only, the code repositories. What you find there is Observed. Content of an approved upstream file is Provided: cite it and never ask for it again. A draft upstream file is also Provided, flagged "draft upstream". Design works only on scopes whose stories are approved; development works only on handed-off scopes; QA works from approved stories and the design handoff; Deployment ships only versions with a QA Go (and a Security Go where the product has a Security stage).
 4. If this step's file already exists, or lint says it is stale, work in **update mode**: change only what the new input affects, bump `doc_version`, and add a change-log row.
 
 **End of every run.**
@@ -72,7 +72,7 @@ Where scripts can't run (no code execution, no access to the docs location), do 
 
 ```yaml
 ---
-pdlc_step: "P04"        # P00-P07, G00-G03, D00-D07, or DEC
+pdlc_step: "P04"        # P00-P07, G00-G04, D00-D07, Q00-Q04, O00-O05, S00-S05, or DEC
 initiative: I-003       # omit for product-wide files
 scope: M01.S02          # product, an initiative, a scope, a story or bug, a version, or a maintenance ID
 doc_version: 1.0.0      # MAJOR: meaning or scope changed; MINOR: items added; PATCH: wording, pinning, references
@@ -135,16 +135,18 @@ Walk the chain from where the change starts. For **every** area, set Status to o
 | 2 | P02 PRD | FRs, BRs, NFRs, information needs, existing behavior that must not change, touchpoints, feature dependency map | Product, this run (update mode) |
 | 3 | P03 UX | Flows (FL), screens (SC), states, microcopy, role visibility | Product, re-run P03 |
 | 4 | P04 stories and handoff | Stories to change / add / remove; edge-case registers (EC); acceptance criteria (AC); ready-for-dev / handoff status | Product, re-run P04 |
-| 5 | G01–G03 design | Sitemap/flow charts, frames or prototype, design handoff, design-references on stories (only if design stage is on; else record `none` — design stage off) | Design, re-run G01–G03 |
+| 5 | G01–G04 design | Sitemap/flow charts, frames or prototype, design handoff, design-references on stories, and `design/04-design-system.md` / `design/system/` when a design system exists (only if design stage is on; else record `none` — design stage off). G04 alone may still apply when `design_system` is set and screens share tokens/components | Design, re-run G01–G04 as needed |
 | 6 | D01 tech design / architecture | Layers (L1–L13), DECs, threat model, approved packages | Development, re-run D01 |
 | 7 | D02 data model | Entities, fields, migrations, existing-data rules, shared entities | Development, re-run D02 |
 | 8 | D03 tasks | Tasks / sub-tasks to change, add, or remove; specification review still valid? | Development, re-run D03 |
 | 9 | D04 built code | Stories already in progress / in review / done / released: rework, rollback, feature flags | Development, re-run D04 |
-| 10 | D05 QA / tests | Test cases (TC) to rewrite or rerun; regression of unchanged behavior; eval sets if AI features | Development, re-run D05 |
-| 11 | D06 releases / production | Shipped versions, production behavior, migrations already applied, rollback needs | Development |
-| 12 | Ops / support / launch | Runbooks, support FAQ, launch kit, Confluence or help content if the product uses them | Product / ops (list explicitly) |
-| 13 | Security / privacy / compliance | Authz, personal data, retention, audit logs, regimes named in product context | Product + Development (query if unclear) |
-| 14 | Must-not-change boundary | Explicit list of behaviors, IDs, and contracts that stay frozen; cite FR/BR/US/AC | Product, this run |
+| 10 | D05 developer tests | Developer-level TCs to rewrite or rerun; eval sets owned in Dev | Development, re-run D05 |
+| 11 | Q01–Q03 independent QA | Test plans, execution, release sign-off (only if `qa_stage` on; else `none` — QA stage off; D05 covers product QA) | QA, re-run Q01–Q03 |
+| 12 | O00–O05 / D06 deploy | Environments, pipelines, releases, incidents (O* if `deploy_stage` on; else D06) | Deployment or Development |
+| 13 | S00–S05 security engagement | Open engagements, findings, accepted risks (only if `security_stage` on; else privacy/compliance obligations still audited in area 14) | Security |
+| 14 | Ops / support / launch | Runbooks, support FAQ, launch kit, help content | Product / ops |
+| 15 | Security / privacy / compliance obligations | Authz, personal data, retention, audit logs, regimes in product context (always; distinct from independent Sec engagements) | Product + Development (query if unclear) |
+| 16 | Must-not-change boundary | Explicit list of behaviors, IDs, and contracts that stay frozen; cite FR/BR/US/AC | Product, this run |
 
 **Per-area row fields (keep in the CR):** Status · File@version · Item IDs · Consideration (what to watch when applying or closing) · Effort (only if the team Provided an estimate) · Risk · Follow-up (re-run step or query ID).
 
@@ -175,23 +177,25 @@ Walk the chain from where the change starts. For **every** area, set Status to o
 What, why, source (including the Q ID if raised by development), urgency, target version, what must not change (all Provided).
 
 ## 2. Impact-area analysis (audit)
-Status: Proposed | Analyzed (all 14 areas filled).
+Status: Proposed | Analyzed (all 16 areas filled).
 | # | Area | Status | File@version | Item IDs | Consideration (keep) | Effort | Risk | Follow-up |
 |---|---|---|---|---|---|---|---|---|
 | 1 | P00 product map | | | | | | | |
 | 2 | P02 PRD | | | | | | | |
 | 3 | P03 UX | | | | | | | |
 | 4 | P04 stories / handoff | | | | | | | |
-| 5 | G01–G03 design | | | | | | | |
+| 5 | G01–G04 design | | | | | | | |
 | 6 | D01 tech design | | | | | | | |
 | 7 | D02 data model | | | | | | | |
 | 8 | D03 tasks | | | | | | | |
 | 9 | D04 built code | | | | | | | |
-| 10 | D05 QA / tests | | | | | | | |
-| 11 | D06 releases / production | | | | | | | |
-| 12 | Ops / support / launch | | | | | | | |
-| 13 | Security / privacy / compliance | | | | | | | |
-| 14 | Must-not-change boundary | | | | | | | |
+| 10 | D05 developer tests | | | | | | | |
+| 11 | Q01–Q03 independent QA | | | | | | | |
+| 12 | O00–O05 / D06 deploy | | | | | | | |
+| 13 | S00–S05 security engagement | | | | | | | |
+| 14 | Ops / support / launch | | | | | | | |
+| 15 | Security / privacy / compliance | | | | | | | |
+| 16 | Must-not-change boundary | | | | | | | |
 
 ## 3. Options (Recommendation)
 | Option | What happens | Trade-off | Impact areas that stay Open |

@@ -1,9 +1,9 @@
 # PDLC skills: Product, Design, and Development
 
-Twenty-one Agent Skills for a team that builds one or more products. The skills take an idea through requirements, design, build, test, release, and launch, with a shared tracker and a script that keeps the chain consistent.
+Twenty-two Agent Skills for a team that builds one or more products. The skills take an idea through requirements, design, build, test, release, and launch, with a shared tracker and a script that keeps the chain consistent.
 
 - **Product** (`product-00` to `07`) turns ideas for new features, or expansions of existing ones, into requirements and user stories. It also owns change requests, the tracker, and the launch kit.
-- **Design** (`design-00` to `03`, optional) turns approved stories into Figma mockups or an HTML prototype. It writes a reference to every screen back into the stories.
+- **Design** (`design-00` to `04`, optional) turns approved stories into Figma mockups or an HTML prototype. It writes a reference to every screen back into the stories.
 - **Development** (`dev-00` to `07`) builds, tests, and releases what was handed off, and handles maintenance work (hotfixes, tech debt, upgrades, spikes, and chores).
 - **pdlc-next** (in `Common/`) is the shared entry point. It answers "what next", "where are we", and "what is open" for any team.
 
@@ -74,6 +74,7 @@ Every step ends by running `lint --fix` and `board`. Where scripts can't run (fo
 | G01 | [design-01-sitemap-flows](Design/design-01-sitemap-flows/SKILL.md) | one initiative | `design/I-<nnn>-<slug>/01-sitemap-flows.md` + FigJam charts |
 | G02 | [design-02-screen-mockups](Design/design-02-screen-mockups/SKILL.md) | one scope | `design/I-<nnn>-<slug>/02-mockups/<scope>.md` + Figma frames or HTML prototype |
 | G03 | [design-03-design-handoff](Design/design-03-design-handoff/SKILL.md) | one scope | `design/I-<nnn>-<slug>/03-handoff/<scope>.md` (the design handoff) |
+| G04 | [design-04-design-system](Design/design-04-design-system/SKILL.md) | product (optional) | `design/04-design-system.md`, then `design/system/` |
 
 ### Development (`Development/`)
 | Step | Skill | Works on | Output |
@@ -83,9 +84,34 @@ Every step ends by running `lint --fix` and `board`. Where scripts can't run (fo
 | D02 | [dev-02-data-model](Development/dev-02-data-model/SKILL.md) | one handed-off scope | `dev/I-<nnn>-<slug>/02-data-model/<scope>.md` |
 | D03 | [dev-03-build-tasks](Development/dev-03-build-tasks/SKILL.md) | one handed-off scope | `dev/I-<nnn>-<slug>/03-tasks/<scope>.md` (`pdlc-tasks` blocks, agent brief, specification review) |
 | D04 | [dev-04-code-plan-build](Development/dev-04-code-plan-build/SKILL.md) | one story, bug, or maintenance item | plan (read map, reuse map, budget) + code built in a sandbox until the locked tests pass |
-| D05 | [dev-05-test-qa](Development/dev-05-test-qa/SKILL.md) | scope or version | test design before build; results, bugs, go / no-go after |
-| D06 | [dev-06-deploy](Development/dev-06-deploy/SKILL.md) | version or event | `dev/releases/<version>.md` (release, hotfix, rollback, incident) |
+| D05 | [dev-05-test-qa](Development/dev-05-test-qa/SKILL.md) | scope or version | developer tests first; product QA / release Go only when `qa_stage` is off |
+| D06 | [dev-06-deploy](Development/dev-06-deploy/SKILL.md) | version or event | release/incident when `deploy_stage` is off; otherwise use Deployment |
 | D07 | [dev-07-maintenance](Development/dev-07-maintenance/SKILL.md) | one maintenance item | `dev/maintenance/<id>.md` (HF, TD, UPG, SPK, CHR) |
+
+### QA (`QA/`, optional — `config.qa_stage`)
+| Step | Skill | Works on | Output |
+|---|---|---|---|
+| Q00 | [qa-00-qa-setup](QA/qa-00-qa-setup/SKILL.md) | product | `qa/00-qa-setup.md` |
+| Q01 | [qa-01-test-plan](QA/qa-01-test-plan/SKILL.md) | one scope | `qa/I-*/01-test-plan/<scope>.md` |
+| Q02 | [qa-02-test-execution](QA/qa-02-test-execution/SKILL.md) | one scope | `qa/I-*/02-results/<scope>.md` |
+| Q03 | [qa-03-release-signoff](QA/qa-03-release-signoff/SKILL.md) | one version | `qa/releases/<version>-signoff.md` (release Go) |
+| Q04 | [qa-04-nonfunctional-testing](QA/qa-04-nonfunctional-testing/SKILL.md) | as needed | `qa/nfr/<slug>.md` |
+
+### Deployment (`Deployment/`, optional — `config.deploy_stage`)
+| Step | Skill | Works on | Output |
+|---|---|---|---|
+| O00 | [deploy-00-deploy-setup](Deployment/deploy-00-deploy-setup/SKILL.md) | product | `deploy/00-deploy-setup.md` |
+| O01 | [deploy-01-environments](Deployment/deploy-01-environments/SKILL.md) | product | `deploy/01-environments.md` |
+| O02 | [deploy-02-pipeline](Deployment/deploy-02-pipeline/SKILL.md) | product | `deploy/02-pipeline.md` |
+| O03 | [deploy-03-release](Deployment/deploy-03-release/SKILL.md) | one version | `deploy/releases/<version>.md` |
+| O04 | [deploy-04-observability-sre](Deployment/deploy-04-observability-sre/SKILL.md) | product | `deploy/04-observability-sre.md` |
+| O05 | [deploy-05-incident-response](Deployment/deploy-05-incident-response/SKILL.md) | incident | `deploy/incidents/…` |
+
+### Security (`Security/`, optional — `config.security_stage`)
+| Step | Skill | Works on | Output |
+|---|---|---|---|
+| S00 | [sec-00-engagement-scope](Security/sec-00-engagement-scope/SKILL.md) | engagement | `security/<engagement>/00-engagement.md` |
+| S01–S05 | attack surface → vulns → privacy → report → retest | engagement | under `security/<engagement>/` |
 
 **Decision log.** Any step that makes a decision of record writes `decisions/DEC-<nnn>-<slug>.md`. Examples: a scope cut, an architecture choice, a change-request outcome, or a spike's result. Files cite the DEC instead of repeating its reasoning.
 
@@ -93,49 +119,48 @@ Every step ends by running `lint --fix` and `board`. Where scripts can't run (fo
 - **`compliance.md`:** checklists for personal data, India's DPDP Act, GDPR, PCI DSS, RBI payments, GST invoicing, communications, and accessibility. These are questions to verify against current official sources, never legal facts.
 - **`threat-model.md`:** STRIDE per data flow, used by dev-01.
 - **`ai-features.md`:** eval sets owned by Product, prompt and model versioning, guardrails, budgets, eval runs in QA, and monitoring.
+- **`secure-by-design.md`:** security considerations for non-Security teams.
+- **`qa-techniques.md`**, **`deploy-platforms.md`**, **`deploy-methods.md`**, **`observability-sre.md`**, **`security-methodology.md`**, **`security-jurisdictions.md`:** team-specific packs.
+- **`design-system-references.md`**, **`responsive-platforms.md`:** Design / G04.
 
 ## Typical flow
-1. **Setup:** Product runs `product-00` once. Design runs `design-00` if the product has a design stage. Development runs `dev-00` and the `dev-01` baseline once.
-2. **Per idea:** `product-01`, which counts the features and takes them one at a time, then `product-02` for the initiative's PRD.
+1. **Setup:** Product runs `product-00` once. Optional stages: Design (`design-00`, then `design-04` if needed), QA (`qa-00`), Deployment (`deploy-00`), Security (engagement via `sec-00`). Development runs `dev-00` and the `dev-01` baseline once.
+2. **Per idea:** `product-01`, then `product-02` for the initiative's PRD.
 3. **Per scope**, lowest dependency level first:
-   - Product: `product-03` (UX and charts), then `product-04` (edge cases first, then stories).
-   - Design: `design-01` per initiative, then `design-02` and `design-03` per scope.
-   - Development, per scope:
-     1. `dev-01` for the initiative, then `dev-02`.
-     2. `dev-05` (test design: tests first).
-     3. `dev-03` (tasks and the specification review).
-     4. `dev-04` per story, in a sandbox until the tests pass.
-     5. `dev-05` (results).
+   - Product: `product-03`, then `product-04`.
+   - Design (if on): `design-01`, then `design-02` and `design-03`.
+   - Development: `dev-01` → `dev-02` → `dev-05` (test design) → `dev-03` → `dev-04` → `dev-05` (developer results).
+   - QA (if on): `qa-01` can start after stories are approved; `qa-02` when stories are `in_qa`.
 4. **Release:**
-   1. The team picks a version's items, and `product-06` checks their dependencies.
-   2. `dev-06` deploys to pre-production, `dev-05` tests the version there, and `dev-06` promotes it to production on a Go.
-   3. `product-07` writes the launch kit, and `product-00` syncs the product map.
-5. **Any time:** `pdlc-next` to see what comes next, `product-05` for changes, `dev-07` for maintenance.
+   - Stages off: `dev-06` → `dev-05` version Go → `dev-06` promote → `product-07`.
+   - Stages on: `deploy-03` stage → `qa-03` Go (+ `sec-05` if Security on) → `deploy-03` promote → `product-07`.
+5. **Any time:** `pdlc-next`, `product-05`, `dev-07`, incidents via `deploy-05` or `dev-06`.
 
 ## Install
 ```bash
-git clone https://github.com/curiyashman/sdlc-yash.git
+git clone https://github.com/curiyashman/sdlc-yash.git   # or graylemon-tech/pldc-skills
 cd sdlc-yash
-# Claude Code / Cursor (user skills)
-cp -r Common/* ~/.claude/skills/         # everyone (pdlc-next)
-cp -r Product/product-* ~/.claude/skills/ # product team
-cp -r Design/design-* ~/.claude/skills/   # design team
-cp -r Development/dev-* ~/.claude/skills/ # development team
-# Or for one Cursor project only:
-# mkdir -p .cursor/skills && cp -r Common/* Product/product-* Design/design-* Development/dev-* .cursor/skills/
+cp -r Common/* ~/.claude/skills/
+cp -r Product/product-* ~/.claude/skills/
+cp -r Design/design-* ~/.claude/skills/
+cp -r Development/dev-* ~/.claude/skills/
+cp -r QA/qa-* ~/.claude/skills/                 # if using QA stage
+cp -r Deployment/deploy-* ~/.claude/skills/     # if using Deployment stage
+cp -r Security/sec-* ~/.claude/skills/          # if using Security stage
 ```
 - `~/.claude/skills/` is read by Claude Code, and also by Cursor (all projects). `<repo>/.claude/skills/` covers one project only; Cursor also reads `.cursor/skills/`.
-- **Claude projects (product team):** add the Product skills and `pdlc-next` to your Claude account. Fill in the configuration block of [`Product/claude-project-instructions.md`](Product/claude-project-instructions.md) and paste it into the project's instructions.
-- **Design team:** add the Design skills and `pdlc-next`, and connect the Figma connector (or choose an HTML prototype). Fill in [`Design/agent-instructions.md`](Design/agent-instructions.md) and paste it into the project's instructions or the repository's `CLAUDE.md`.
-- **Coding agents (development team):** fill in [`Development/agent-instructions.md`](Development/agent-instructions.md) and add it to `CLAUDE.md` and `AGENTS.md` of each code repository. Or let `dev-00-dev-setup` add its pointer, the lint script, and the CI check.
-- **Remove the older skills** where these are installed, so two skills don't compete for the same request: `pdlc-00` to `pdlc-12`, workflow-architect, fullstack-architect, research-driven-prd, prd-to-ux-ui, requirements-to-stories, product-brainstorm, devops-sre-expert, and schema-design-interview. `design-system-spec` stays separate.
+- **Claude projects (product team):** add the Product skills and `pdlc-next`. Fill in [`Product/claude-project-instructions.md`](Product/claude-project-instructions.md).
+- **Design / QA / Deployment / Security:** add that team's skills + `pdlc-next`, and the matching `*/agent-instructions.md`.
+- **Coding agents (development team):** fill in [`Development/agent-instructions.md`](Development/agent-instructions.md) in `CLAUDE.md` / `AGENTS.md`. Or let `dev-00-dev-setup` add its pointer, lint script, and CI.
+- **Remove older competing skills** where installed: `pdlc-00` to `pdlc-12`, workflow-architect, fullstack-architect, research-driven-prd, prd-to-ux-ui, requirements-to-stories, product-brainstorm, devops-sre-expert, schema-design-interview, design-system-architect / design-system-spec (use G04).
 
 ## Editing the skills
-Never edit the generated folders (`Common/`, `Product/`, `Design/`, `Development/`). Edit `source/` and rebuild:
+Never edit the generated folders (`Common/`, `Product/`, `Design/`, `Development/`, `QA/`, `Deployment/`, `Security/`). Edit `source/` and rebuild:
 
 | File | Holds |
 |---|---|
-| `source/core.md` | the short core inlined in every SKILL.md |
+| `source/core.md` | the short core inlined in every non-Security SKILL.md |
+| `source/core-security.md` | isolated core inlined in every `sec-*` SKILL.md |
 | `source/conventions.md` | the full rules, bundled as `references/conventions.md` |
 | `source/skills/<name>.md` | one skill's own content |
 | `source/packs/` | the reference packs |

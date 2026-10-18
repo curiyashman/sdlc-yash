@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-"""pdlc.py: checks and views for a product's PDLC docs (Product, Design, Development chain).
+"""pdlc.py: checks and views for a product's PDLC docs (Product, Design, Development,
+QA, Deployment, Security chain).
 
 Commands (run from anywhere; --root is the product's docs path, default docs/pdlc):
   lint     [--fix] [--strict]  validate headers, upstream versions, IDs, citations, dependencies,
                                queries, handoff and design references. --fix writes dep levels.
   board                        regenerate tracker.md from tracker.yaml and the file headers.
-  next     [--team product|design|dev]   the next steps and scopes, by dependency.
+  next     [--team product|design|dev|qa|deploy|security]   the next steps and scopes, by dependency.
   new-id   KIND [PARENT]       the next free ID (initiative, module, sub-module, feature, story,
                                task, subtask, fr, br, nfr, ec, ac, ev, sc, fl, tc, bug, query,
                                cr, dec, hf, td, upg, spk, chr).
@@ -66,12 +67,21 @@ CITE = {
     "US": (rf"\b{STORY}\b(?!-(?:AC|T){H2})", lambda p: "/04-stories/" in p),
     "SC": (rf"\b{SCOPE}-SC{H2}\b", lambda p: "/03-ux/" in p),
     "FL": (rf"\b{SCOPE}-FL{H2}\b", lambda p: "/03-ux/" in p),
-    "TC": (rf"\b{STORY}-TC{H2}\b", lambda p: "/05-qa/" in p or p.startswith("dev/releases/")),
+    "TC": (rf"\b{STORY}-TC{H2}\b",
+           lambda p: "/05-qa/" in p or "/01-test-plan/" in p or p.startswith("qa/")
+           or p.startswith("dev/releases/")),
     "NFR": (rf"\bI-{H3}-NFR{H2}\b", lambda p: p.endswith("/02-prd.md")),
     "EV": (rf"\b{FEAT}-EV{H2}\b", lambda p: "/04-stories/" in p),
 }
-STEP_ORDER = ["P00", "P01", "P02", "P03", "P04", "P05", "P06", "P07", "G00", "G01", "G02",
-              "G03", "D00", "D01", "D02", "D03", "D04", "D05", "D06", "D07", "DEC"]
+STEP_ORDER = [
+    "P00", "P01", "P02", "P03", "P04", "P05", "P06", "P07",
+    "G00", "G01", "G02", "G03", "G04",
+    "D00", "D01", "D02", "D03", "D04", "D05", "D06", "D07",
+    "Q00", "Q01", "Q02", "Q03", "Q04",
+    "O00", "O01", "O02", "O03", "O04", "O05",
+    "S00", "S01", "S02", "S03", "S04", "S05",
+    "DEC",
+]
 REQUIRED_KEYS = ["pdlc_step", "scope", "doc_version", "status", "depends_on", "updated"]
 SKILL = {
     "P00": "product-00-product-context", "P01": "product-01-feature-brainstorm",
@@ -79,10 +89,30 @@ SKILL = {
     "P05": "product-05-change-request", "P06": "product-06-project-tracker",
     "P07": "product-07-launch", "G00": "design-00-design-setup",
     "G01": "design-01-sitemap-flows", "G02": "design-02-screen-mockups",
-    "G03": "design-03-design-handoff", "D00": "dev-00-dev-setup", "D01": "dev-01-tech-design",
+    "G03": "design-03-design-handoff",
+    "G04": "design-04-design-system", "D00": "dev-00-dev-setup", "D01": "dev-01-tech-design",
     "D02": "dev-02-data-model", "D03": "dev-03-build-tasks", "D04": "dev-04-code-plan-build",
     "D05": "dev-05-test-qa", "D06": "dev-06-deploy", "D07": "dev-07-maintenance",
+    "Q00": "qa-00-qa-setup", "Q01": "qa-01-test-plan", "Q02": "qa-02-test-execution",
+    "Q03": "qa-03-release-signoff", "Q04": "qa-04-nonfunctional-testing",
+    "O00": "deploy-00-deploy-setup", "O01": "deploy-01-environments", "O02": "deploy-02-pipeline",
+    "O03": "deploy-03-release", "O04": "deploy-04-observability-sre",
+    "O05": "deploy-05-incident-response",
+    "S00": "sec-00-engagement-scope", "S01": "sec-01-attack-surface",
+    "S02": "sec-02-vulnerability-assessment", "S03": "sec-03-privacy-compliance-audit",
+    "S04": "sec-04-audit-report-remediation", "S05": "sec-05-retest-signoff",
 }
+TEAM_OF = {
+    "P": "product", "G": "design", "D": "dev",
+    "Q": "qa", "O": "deploy", "S": "security",
+}
+NEXT_TEAMS = ("product", "design", "dev", "qa", "deploy", "security")
+
+
+def team_of_step(step):
+    if not step:
+        return "dev"
+    return TEAM_OF.get(str(step)[0], "dev")
 
 # ---------------------------------------------------------------- YAML
 
@@ -361,6 +391,32 @@ class Docs:
             return bool(cfg["design_stage"])
         d = self.files.get("design/00-design-setup.md")
         return bool(d and d["fm"] and d["fm"].get("status") == "approved")
+
+    def qa_stage(self):
+        cfg = self.tracker.get("config") or {}
+        if "qa_stage" in cfg:
+            return bool(cfg["qa_stage"])
+        d = self.files.get("qa/00-qa-setup.md")
+        return bool(d and d["fm"] and d["fm"].get("status") == "approved")
+
+    def deploy_stage(self):
+        cfg = self.tracker.get("config") or {}
+        if "deploy_stage" in cfg:
+            return bool(cfg["deploy_stage"])
+        d = self.files.get("deploy/00-deploy-setup.md")
+        return bool(d and d["fm"] and d["fm"].get("status") == "approved")
+
+    def security_stage(self):
+        cfg = self.tracker.get("config") or {}
+        if "security_stage" in cfg:
+            return bool(cfg["security_stage"])
+        # Any approved engagement scope turns the stage on when the flag is unset.
+        for p, d in self.files.items():
+            if p.startswith("security/") and p.endswith("00-engagement.md"):
+                fm = d.get("fm") or {}
+                if fm.get("status") == "approved" and str(fm.get("pdlc_step")) == "S00":
+                    return True
+        return False
 
     def status_name(self, role):
         names = (self.tracker.get("config") or {}).get("statuses") or {}
@@ -869,8 +925,9 @@ def stories_of(docs, scope):
 def compute_next(docs, team=None):
     level, _ = compute_levels(docs)
     stale = stale_map(docs)
-    out = {"product": [], "design": [], "dev": []}
+    out = {t: [] for t in NEXT_TEAMS}
     P, G, D = out["product"], out["design"], out["dev"]
+    Q, O, S = out["qa"], out["deploy"], out["security"]
 
     def ok(step, ini=None, scope=None):
         p, fm = docs.find(step, ini, scope)
@@ -886,23 +943,35 @@ def compute_next(docs, team=None):
             P.append(("product-05-change-request", c.get("id"), f"CR is {c.get('status')}, not applied"))
     for q in docs.tracker.get("queries") or []:
         if q.get("status") == "open":
-            who = q.get("to") if q.get("to") in ("product", "design", "dev") else "product"
+            who = q.get("to") if q.get("to") in NEXT_TEAMS else "product"
             out[who].append(("answer " + str(q.get("id")), ", ".join(map(str, q.get("about") or [])),
                              ("blocking " if q.get("blocking") else "") + "query: " + str(q.get("question", ""))[:80]))
     for p, lst in sorted(stale.items()):
         fm = docs.files[p]["fm"]
         step = str(fm.get("pdlc_step"))
-        team_of = "product" if step.startswith("P") else "design" if step.startswith("G") else "dev"
-        if step in SKILL:
+        team_of = team_of_step(step)
+        if step in SKILL and team_of in out:
             out[team_of].append((SKILL[step], f"{fm.get('initiative', '')} {fm.get('scope')}".strip(),
                                  f"update mode: {lst[0][0]} moved to {lst[0][2]}"))
     design = docs.design_stage()
+    qa = docs.qa_stage()
+    deploy = docs.deploy_stage()
+    security = docs.security_stage()
     if design and not exists("G00"):
         G.append(("design-00-design-setup", "product", "design stage on, no setup file"))
+    if design and exists("G00") and not exists("G04") and \
+            str((docs.tracker.get("config") or {}).get("design_system", "")) == "planned":
+        G.append(("design-04-design-system", "product", "design system planned, no audit or proposal yet"))
     if not exists("D00"):
         D.append(("dev-00-dev-setup", "product", "no dev setup yet"))
     if not docs.files.get("dev/architecture.md"):
         D.append(("dev-01-tech-design", "baseline", "no product-wide architecture yet"))
+    if qa and not exists("Q00"):
+        Q.append(("qa-00-qa-setup", "product", "QA stage on, no setup file"))
+    if deploy and not exists("O00"):
+        O.append(("deploy-00-deploy-setup", "product", "Deployment stage on, no setup file"))
+    if security and not exists("S00"):
+        S.append(("sec-00-engagement-scope", "product", "Security stage on, no engagement scoped yet"))
 
     for ini in docs.tracker["initiatives"]:
         if not isinstance(ini, dict) or ini.get("status") in DONE_ROLES:
@@ -966,33 +1035,61 @@ def compute_next(docs, team=None):
                 D.append(("dev-04-code-plan-build", str(x.get("id")),
                           f"ready for dev, dependencies done (level {level.get(str(x.get('id')), 0)})"))
             if any(x.get("status") == "in_qa" for x in stories_of(docs, sid)):
-                D.append(("dev-05-test-qa", tag, "stories in QA"))
+                if qa:
+                    Q.append(("qa-02-test-execution", tag, "stories in QA (independent QA stage)"))
+                else:
+                    D.append(("dev-05-test-qa", tag, "stories in QA"))
+            if qa and ok("P04", iid, sid) and not exists("Q01", iid, sid):
+                Q.append(("qa-01-test-plan", tag, "stories approved; QA plan can start in parallel with build"))
     for i in docs.items:
         if i.get("type") in MAINT_TYPES and i.get("status") not in DONE_ROLES:
             D.append(("dev-07-maintenance" if i.get("status") in ("backlog",) else "dev-04-code-plan-build",
                       str(i.get("id")), f"{i.get('type')}: {i.get('title', '')}"))
         if i.get("type") == "bug" and i.get("status") not in DONE_ROLES | {"in_qa"}:
             D.append(("dev-04-code-plan-build", str(i.get("id")), f"bug: {i.get('title', '')}"))
-    idx = docs.item_index()
     for v in docs.tracker.get("versions") or []:
+        vid = str(v.get("id"))
         if v.get("status") in ("planned", "in_progress"):
-            its = [i for i in docs.items if str(i.get("fix_version", "")) == str(v.get("id"))]
+            its = [i for i in docs.items if str(i.get("fix_version", "")) == vid]
             if its and all(i.get("status") in DONE_ROLES for i in its):
-                D.append(("dev-06-deploy", str(v.get("id")), "every item in the version is done"))
+                if deploy:
+                    O.append(("deploy-03-release", vid, "every item in the version is done; stage to pre-production"))
+                else:
+                    D.append(("dev-06-deploy", vid, "every item in the version is done"))
+        if v.get("status") == "staged":
+            if qa and not ok("Q03", None, vid) and not exists("Q03", None, vid):
+                Q.append(("qa-03-release-signoff", vid, "version staged; release QA Go / No-go"))
+            elif not qa:
+                D.append(("dev-05-test-qa", vid, "version staged; developer version QA"))
+            if security:
+                S.append(("sec-05-retest-signoff", vid,
+                          "Security stage on: confirm engagement sign-off before production promote"))
         if v.get("status") == "released":
-            done = [i for i in docs.items if str(i.get("fix_version", "")) == str(v.get("id"))
+            done = [i for i in docs.items if str(i.get("fix_version", "")) == vid
                     and i.get("type") == "story"]
-            if done and not any(f.startswith("product/launch/") and str(v.get("id")) in f for f in docs.files):
-                P.append(("product-07-launch", str(v.get("id")), "released; no launch kit yet (if the team uses one)"))
+            if done and not any(f.startswith("product/launch/") and vid in f for f in docs.files):
+                P.append(("product-07-launch", vid, "released; no launch kit yet (if the team uses one)"))
     if team:
         return {team: out[team]}
+    # Hide empty optional teams when their stage is off, keep product/dev always.
+    if team is None:
+        shown = {"product": out["product"], "design": out["design"], "dev": out["dev"]}
+        if qa or out["qa"]:
+            shown["qa"] = out["qa"]
+        if deploy or out["deploy"]:
+            shown["deploy"] = out["deploy"]
+        if security or out["security"]:
+            shown["security"] = out["security"]
+        return shown
     return out
 
 
 def render_next(nx):
     lines = []
+    labels = {"product": "Product", "design": "Design", "dev": "Development",
+              "qa": "QA", "deploy": "Deployment", "security": "Security"}
     for team, rows in nx.items():
-        lines.append(f"### {team.capitalize()}")
+        lines.append(f"### {labels.get(team, team.capitalize())}")
         if not rows:
             lines.append("Nothing waiting.")
         seen = set()
@@ -1031,8 +1128,12 @@ def render_board(docs):
     o = []
     o.append("<!-- Generated by pdlc.py board from tracker.yaml and the file headers. Do not edit; edit tracker.yaml or the files. -->")
     o.append(f"# Tracker: {name}\n")
+    stages = (f"design: {'on' if docs.design_stage() else 'off'} · "
+              f"qa: {'on' if docs.qa_stage() else 'off'} · "
+              f"deploy: {'on' if docs.deploy_stage() else 'off'} · "
+              f"security: {'on' if docs.security_stage() else 'off'}")
     o.append(f"Generated {date.today().isoformat()} · lint: {len(rep.errors)} errors, {len(rep.warnings)} warnings · "
-             f"design stage: {'on' if docs.design_stage() else 'off'}\n")
+             f"{stages}\n")
     # 1 summary
     o.append("## 1. Summary")
     counts = {}
@@ -1183,7 +1284,7 @@ def main(argv=None):
             sp.add_argument("--fix", action="store_true", help="write computed dependency levels")
             sp.add_argument("--strict", action="store_true", help="treat warnings as errors")
         if name == "next":
-            sp.add_argument("--team", choices=["product", "design", "dev"])
+            sp.add_argument("--team", choices=list(NEXT_TEAMS))
         if name == "new-id":
             sp.add_argument("kind")
             sp.add_argument("parent", nargs="?")

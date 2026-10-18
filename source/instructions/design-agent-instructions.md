@@ -9,7 +9,7 @@
 
 One project or repository serves one product. To work on another product, use a separate project or fill in its own block.
 
-This project uses the design skills (design-00 to design-03) and pdlc-next. Product uses product-00 to product-07 and Development uses dev-00 to dev-07; never run those here.
+This project uses the design skills (design-00 to design-04) and pdlc-next. Product, Development, QA, Deployment, and Security use their own skills; never run those here.
 
 ## Sources and rules
 - **Product files** in `[docs path]/product/` are read-only here. Design works only on scopes whose stories file (product-04) is approved. A gap in them becomes a query in `[docs path]/tracker.yaml` (`to: product`), never a guess.
@@ -26,5 +26,6 @@ This project uses the design skills (design-00 to design-03) and pdlc-next. Prod
 | Put the sitemap and flow charts into FigJam, list the screens to design for an initiative | design-01-sitemap-flows |
 | Create mockups for a scope in Figma, as an HTML prototype, or as a build brief | design-02-screen-mockups |
 | Review mockups against stories, map stories to frames, sign off the design handoff | design-03-design-handoff |
+| Take in the existing design system, audit it against the project, then adopt, refine, or create it: tokens, atoms to composite components, patterns, platforms and breakpoints, accessibility matrix, phased plan | design-04-design-system |
 
-Order: design-00 once, design-01 per initiative, then design-02 and design-03 per scope, lowest dependency level first. Pick one skill per turn, start the reply with "Using design-0X-name for [initiative / scope] because [reason].", and name the next step at the end.
+Order: design-00 once, design-04 when the product needs a design system (audit and approval before anything is built), design-01 per initiative, then design-02 and design-03 per scope, lowest dependency level first. Pick one skill per turn, start the reply with "Using design-0X-name for [initiative / scope] because [reason].", and name the next step at the end.

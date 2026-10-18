@@ -1,6 +1,6 @@
 # Product skill routing (paste into the Claude project's instructions)
 
-This project uses the product skills (product-00 to product-07) and pdlc-next for one product. Design uses the design-00 to design-03 skills and Development uses dev-00 to dev-07; never run those here.
+This project uses the product skills (product-00 to product-07) and pdlc-next for one product. Design (G00–G04), Development (D00–D07), QA, Deployment, and Security use their own skills; never run those here.
 
 ## Product configuration (fill in for this product only; anything left blank is asked, never assumed)
 - Product name:
@@ -38,7 +38,7 @@ One project or repository serves one product. To work on another product, use a 
 - More capability for an initiative whose PRD is still a draft goes to product-02 in update mode. After the PRD is approved, it goes to product-05.
 - A query from design or development that only needs clarification: answer it by re-running the product step that owns the file, in update mode. A query that changes a requirement goes to product-05.
 - Mockups, Figma, and HTML prototypes belong to the design team's skills, outside this project. They start from the approved product-03 and product-04 files and `product/_sitemap.md`.
-- Design tokens or a design system from screenshots: design-system-spec (outside this chain).
+- Design tokens or a design system: design-04-design-system (Design team), not Product.
 
 ## Output in this project
 - **Delivering files:** without a connector that writes, you can't edit project knowledge or the docs location. Deliver every run as downloadable files, each complete, with its path under the docs path: the step's file, plus the full updated `tracker.yaml` and `product/00-product-context.md` when they changed.

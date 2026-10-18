@@ -22,11 +22,11 @@ If the Figma connector is not connected, say so, and tell the person to connect 
 
 ## PDLC core (the same in every skill of this chain)
 
-This skill is one step of a product development chain that three teams run for one product at a time. **Product** (P00 to P07) decides what is built, **Design** (G00 to G03, optional) decides how it looks, and **Development** (D00 to D07) decides how it is built. Anyone can ask `pdlc-next` which step and scope come next. The full rules are in `references/conventions.md` in this skill's folder. Read the section named in [brackets] when this core points to it, instead of guessing.
+This skill is one step of a product development chain that up to six teams run for one product at a time. **Product** (P00 to P07) decides what is built, **Design** (G00 to G04, optional) decides how it looks, **Development** (D00 to D07) decides how it is built and tests it at developer level, **QA** (Q00 to Q04) independently checks the product against its requirements, **Deployment** (O00 to O05) ships and operates it, and **Security** (S00 to S05) independently attacks and audits it. Security is built into every team's work (`references/secure-by-design.md` where bundled), so the independent audit finds few surprises. Anyone can ask `pdlc-next` which step and scope come next. The full rules are in `references/conventions.md` in this skill's folder. Read the section named in [brackets] when this core points to it, instead of guessing.
 
 **Which product.** First settle which product this run is for: ask the person, read the product configuration in the project or agent instructions, or check the folder you were opened in. If more than one product could apply, ask. Use only that product's **docs location** (repository, branch, folder), its **docs path** (the folder holding these files, `docs/pdlc/` unless recorded otherwise), and its **code repositories**. They are recorded in `product/00-product-context.md` and `dev/00-dev-setup.md`. Never carry facts, IDs, or paths over from another product. [Product locations]
 
-**Team boundary.** Product decides what; Design decides how it looks; Development decides how it is built. Each team writes only in its own folder (`product/`, `design/`, `dev/`). Any team may write to `tracker.yaml` and `decisions/`. Design steps may also write the design reference fields in product files. Nobody guesses about another team's area: a gap becomes a query (`Q-001`) in `tracker.yaml`. Only product-05-change-request changes an approved requirement, flow, story, edge case, or acceptance criterion. [Team boundary] [Handoff] [Queries] [Design references]
+**Team boundary.** Product decides what; Design decides how it looks; Development decides how it is built; QA decides whether it meets its requirements; Deployment decides how it is released and run; Security decides how safe it is, from outside the other teams' context. Each team writes only in its own folder (`product/`, `design/`, `dev/`, `qa/`, `deploy/`, `security/`). Any team may write to `tracker.yaml` and `decisions/`. Design steps may also write the design reference fields in product files. Nobody guesses about another team's area: a gap becomes a query (`Q-001`) in `tracker.yaml`. Only product-05-change-request changes an approved requirement, flow, story, edge case, or acceptance criterion. [Team boundary] [Handoff] [Queries] [Design references]
 
 **Requirements are the source of truth. Order comes from dependencies. Timelines belong to the team.** Plan nothing that doesn't trace to a requirement; a maintenance item traces to its recorded reason instead. Never drop, defer, or trim a requirement, and never slice it into an MVP. Never propose dates, durations, estimates, priorities, or sprint contents. Record them as Provided when the team gives them. [Planning principles]
 
@@ -49,7 +49,7 @@ Later files cite the ID with a short title and never restate the content. [IDs]
 **The tracker is data.** `tracker.yaml` is the source of tracking data. `tracker.md` is generated from it and never edited by hand. Tasks and sub-tasks live in a `pdlc-tasks` YAML block in their scope's task file, not in the tracker. The script `scripts/pdlc.py` in this skill's folder (Python 3) does the bookkeeping; `<docs>` is the docs path:
 - `python scripts/pdlc.py lint --root <docs>` checks headers, stale upstream files, IDs, cited IDs, dependency cycles and levels, queries, the handoff, and design references. `--fix` writes the computed dependency levels.
 - `python scripts/pdlc.py board --root <docs>` regenerates `tracker.md`.
-- `python scripts/pdlc.py next --root <docs> [--team product|design|dev]` lists the next steps by dependency.
+- `python scripts/pdlc.py next --root <docs> [--team product|design|dev|qa|deploy|security]` lists the next steps by dependency.
 - `python scripts/pdlc.py new-id <kind> [parent] --root <docs>` gives the next free ID. Always allocate IDs this way when the script can run.
 - `python scripts/pdlc.py open --root <docs>` shows every Open item and query in one view.
 
@@ -57,8 +57,8 @@ Where scripts can't run (no code execution, no access to the docs location), do 
 
 **Start of every run.**
 1. Settle which product.
-2. Run `lint`, or, where scripts can't run, read `product/00-product-context.md`, `tracker.yaml`, and this step's upstream files. If the setup file your team needs is missing, offer that team's setup step (product-00, design-00, or dev-00).
-3. Before asking anything, read the docs location and, read-only, the code repositories. What you find there is Observed. Content of an approved upstream file is Provided: cite it and never ask for it again. A draft upstream file is also Provided, flagged "draft upstream". Design works only on scopes whose stories are approved; development works only on handed-off scopes.
+2. Run `lint`, or, where scripts can't run, read `product/00-product-context.md`, `tracker.yaml`, and this step's upstream files. If the setup file your team needs is missing, offer that team's setup step (product-00, design-00, dev-00, qa-00, or deploy-00).
+3. Before asking anything, read the docs location and, read-only, the code repositories. What you find there is Observed. Content of an approved upstream file is Provided: cite it and never ask for it again. A draft upstream file is also Provided, flagged "draft upstream". Design works only on scopes whose stories are approved; development works only on handed-off scopes; QA works from approved stories and the design handoff; Deployment ships only versions with a QA Go (and a Security Go where the product has a Security stage).
 4. If this step's file already exists, or lint says it is stale, work in **update mode**: change only what the new input affects, bump `doc_version`, and add a change-log row.
 
 **End of every run.**
@@ -72,7 +72,7 @@ Where scripts can't run (no code execution, no access to the docs location), do 
 
 ```yaml
 ---
-pdlc_step: "P04"        # P00-P07, G00-G03, D00-D07, or DEC
+pdlc_step: "P04"        # P00-P07, G00-G04, D00-D07, Q00-Q04, O00-O05, S00-S05, or DEC
 initiative: I-003       # omit for product-wide files
 scope: M01.S02          # product, an initiative, a scope, a story or bug, a version, or a maintenance ID
 doc_version: 1.0.0      # MAJOR: meaning or scope changed; MINOR: items added; PATCH: wording, pinning, references
@@ -112,7 +112,7 @@ Facts about the product, its users, data, rules, scale, or environment are never
 **5. Short chat reply.** In one or two sentences, cover the file, what needs a decision, the lint result, and the next step. Never paste the file into chat.
 
 ## Upstream files
-`product/00-product-context.md` (platforms, roles, design system location, approvers); `product/_sitemap.md`; any existing design-system documentation in the product's docs location (including output of the design-system-spec skill, if used); the product's docs and front-end code repositories (read-only) for existing components and tokens (Observed); `tracker.yaml`. In Figma, when readable: the design files and library the person names (Observed).
+`product/00-product-context.md` (platforms, roles, design system location, approvers); `product/_sitemap.md`; any existing design-system documentation in the product's docs location (including `design/04-design-system.md` and `design/system/` if design-04-design-system has run); the product's docs and front-end code repositories (read-only) for existing components and tokens (Observed); `tracker.yaml`. In Figma, when readable: the design files and library the person names (Observed).
 
 ## Questionnaire (skip what upstream files answer)
 
@@ -123,12 +123,13 @@ Facts about the product, its users, data, rules, scale, or environment are never
 3a. Design medium: Figma frames, an HTML prototype, or both? Default: Figma when the connector can build frames (level A), otherwise an HTML prototype if the team wants something clickable, otherwise build briefs (level B or C).
 
 **Step 2: Design system**
-4. Where does the design system live: a Figma library (link), variables or tokens in Figma, tokens in the code, a spec document, or none?
+4. Do you have an existing design system? Ask for every source: Figma library or file links, tokens or theme files and the component library in the code repositories, a style guide or brand guidelines, a spec document, the live product. Is it maintained, and by whom? Or none? Record the sources; design-04-design-system audits them against this product's requirements and either refines the existing system or creates a new one.
 5. Themes (light, dark, brand), fonts, and icon set that mockups must use.
+5b. May Claude edit the existing Figma library (components, variables, styles) when the design system is refined, or is it read only? (Edits happen only after design-04 is approved, each listed in its file.)
 6. When a needed component does not exist: use the closest one and flag the gap, or create a local component and flag it? (Either way the gap is listed.)
 
 **Step 3: Frames**
-7. Platforms and the frame sizes or breakpoints to design for (confirm from the product context), and the grid.
+7. Platforms (web, iOS, Android; phone, tablet, desktop, foldable), only those the product context requires, with the order (first, later) when the product is web first or rolls out in stages, and for each: native, cross-platform, or responsive web; size classes or breakpoints; orientations; input modes (touch, pointer, keyboard); minimum OS and browser versions; the grid. Confirm from the product context; what it does not say is a question, not an assumption. Details and options are in `references/responsive-platforms.md`.
 8. States every screen shows (default, loading, empty, error, success, disabled, and so on), or only those the UX files define?
 
 **Step 4: Process**
@@ -162,7 +163,7 @@ Page and frame naming, annotation conventions.
 ## 3. Design system
 Sources (library, variables, tokens, spec), themes, fonts, icons, missing-component policy. What was read and what was not.
 ## 4. Frames
-Platforms, frame sizes and breakpoints, grid, states shown on every screen.
+**Platform and responsive profile** (the table from `references/responsive-platforms.md` section 1: platform, in scope, approach, size classes or breakpoints with the reason for each, orientation, input modes, native conventions followed, minimum versions, label). Grid, states shown on every screen. Every later Design step cites this table.
 ## 5. Process
 Approver, review channel, which scopes go through the design stage.
 ## 6. Open questions
@@ -170,4 +171,4 @@ Approver, review channel, which scopes go through the design stage.
 ```
 
 ## Tracker
-Set `config.design_stage: true` in `tracker.yaml` on approval (or `false` if the team decides to have no design stage). From then on, P04 approval moves the stories of scopes with screens to `in_design`. Next: design-01-sitemap-flows for an initiative whose scopes have approved P03 and P04 files, or design-02-screen-mockups for a scope when the initiative's charts already exist. `pdlc-next` shows which scopes wait for design.
+Set `config.design_stage: true` in `tracker.yaml` on approval (or `false` if the team decides to have no design stage). From then on, P04 approval moves the stories of scopes with screens to `in_design`. Record `config.design_system: planned` in `tracker.yaml` whenever the product has an existing design system to audit or needs a new one (`none` if the team wants no design-system work); `planned` makes pdlc-next suggest design-04-design-system, which settles Adopt, Refine, or Create. Next: design-01-sitemap-flows for an initiative whose scopes have approved P03 and P04 files, or design-02-screen-mockups for a scope when the initiative's charts already exist. `pdlc-next` shows which scopes wait for design.

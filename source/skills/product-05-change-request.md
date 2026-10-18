@@ -46,16 +46,18 @@ Walk the chain from where the change starts. For **every** area, set Status to o
 | 2 | P02 PRD | FRs, BRs, NFRs, information needs, existing behavior that must not change, touchpoints, feature dependency map | Product, this run (update mode) |
 | 3 | P03 UX | Flows (FL), screens (SC), states, microcopy, role visibility | Product, re-run P03 |
 | 4 | P04 stories and handoff | Stories to change / add / remove; edge-case registers (EC); acceptance criteria (AC); ready-for-dev / handoff status | Product, re-run P04 |
-| 5 | G01–G03 design | Sitemap/flow charts, frames or prototype, design handoff, design-references on stories (only if design stage is on; else record `none` — design stage off) | Design, re-run G01–G03 |
+| 5 | G01–G04 design | Sitemap/flow charts, frames or prototype, design handoff, design-references on stories, and `design/04-design-system.md` / `design/system/` when a design system exists (only if design stage is on; else record `none` — design stage off). G04 alone may still apply when `design_system` is set and screens share tokens/components | Design, re-run G01–G04 as needed |
 | 6 | D01 tech design / architecture | Layers (L1–L13), DECs, threat model, approved packages | Development, re-run D01 |
 | 7 | D02 data model | Entities, fields, migrations, existing-data rules, shared entities | Development, re-run D02 |
 | 8 | D03 tasks | Tasks / sub-tasks to change, add, or remove; specification review still valid? | Development, re-run D03 |
 | 9 | D04 built code | Stories already in progress / in review / done / released: rework, rollback, feature flags | Development, re-run D04 |
-| 10 | D05 QA / tests | Test cases (TC) to rewrite or rerun; regression of unchanged behavior; eval sets if AI features | Development, re-run D05 |
-| 11 | D06 releases / production | Shipped versions, production behavior, migrations already applied, rollback needs | Development |
-| 12 | Ops / support / launch | Runbooks, support FAQ, launch kit, Confluence or help content if the product uses them | Product / ops (list explicitly) |
-| 13 | Security / privacy / compliance | Authz, personal data, retention, audit logs, regimes named in product context | Product + Development (query if unclear) |
-| 14 | Must-not-change boundary | Explicit list of behaviors, IDs, and contracts that stay frozen; cite FR/BR/US/AC | Product, this run |
+| 10 | D05 developer tests | Developer-level TCs to rewrite or rerun; eval sets owned in Dev | Development, re-run D05 |
+| 11 | Q01–Q03 independent QA | Test plans, execution, release sign-off (only if `qa_stage` on; else `none` — QA stage off; D05 covers product QA) | QA, re-run Q01–Q03 |
+| 12 | O00–O05 / D06 deploy | Environments, pipelines, releases, incidents (O* if `deploy_stage` on; else D06) | Deployment or Development |
+| 13 | S00–S05 security engagement | Open engagements, findings, accepted risks (only if `security_stage` on; else privacy/compliance obligations still audited in area 14) | Security |
+| 14 | Ops / support / launch | Runbooks, support FAQ, launch kit, help content | Product / ops |
+| 15 | Security / privacy / compliance obligations | Authz, personal data, retention, audit logs, regimes in product context (always; distinct from independent Sec engagements) | Product + Development (query if unclear) |
+| 16 | Must-not-change boundary | Explicit list of behaviors, IDs, and contracts that stay frozen; cite FR/BR/US/AC | Product, this run |
 
 **Per-area row fields (keep in the CR):** Status · File@version · Item IDs · Consideration (what to watch when applying or closing) · Effort (only if the team Provided an estimate) · Risk · Follow-up (re-run step or query ID).
 
@@ -86,23 +88,25 @@ Walk the chain from where the change starts. For **every** area, set Status to o
 What, why, source (including the Q ID if raised by development), urgency, target version, what must not change (all Provided).
 
 ## 2. Impact-area analysis (audit)
-Status: Proposed | Analyzed (all 14 areas filled).
+Status: Proposed | Analyzed (all 16 areas filled).
 | # | Area | Status | File@version | Item IDs | Consideration (keep) | Effort | Risk | Follow-up |
 |---|---|---|---|---|---|---|---|---|
 | 1 | P00 product map | | | | | | | |
 | 2 | P02 PRD | | | | | | | |
 | 3 | P03 UX | | | | | | | |
 | 4 | P04 stories / handoff | | | | | | | |
-| 5 | G01–G03 design | | | | | | | |
+| 5 | G01–G04 design | | | | | | | |
 | 6 | D01 tech design | | | | | | | |
 | 7 | D02 data model | | | | | | | |
 | 8 | D03 tasks | | | | | | | |
 | 9 | D04 built code | | | | | | | |
-| 10 | D05 QA / tests | | | | | | | |
-| 11 | D06 releases / production | | | | | | | |
-| 12 | Ops / support / launch | | | | | | | |
-| 13 | Security / privacy / compliance | | | | | | | |
-| 14 | Must-not-change boundary | | | | | | | |
+| 10 | D05 developer tests | | | | | | | |
+| 11 | Q01–Q03 independent QA | | | | | | | |
+| 12 | O00–O05 / D06 deploy | | | | | | | |
+| 13 | S00–S05 security engagement | | | | | | | |
+| 14 | Ops / support / launch | | | | | | | |
+| 15 | Security / privacy / compliance | | | | | | | |
+| 16 | Must-not-change boundary | | | | | | | |
 
 ## 3. Options (Recommendation)
 | Option | What happens | Trade-off | Impact areas that stay Open |

@@ -166,6 +166,22 @@ class TestLevelsNextIds(Base):
         nx = pdlc.compute_next(pdlc.Docs(self.root), "dev")["dev"]
         self.assertEqual(nx[0][0], "dev-05-test-qa", nx)
 
+    def test_g04_design_system_file_is_valid(self):
+        d = os.path.join(self.root, "design")
+        open(os.path.join(d, "04-design-system.md"), "w").write(
+            '---\npdlc_step: "G04"\nscope: product\ndoc_version: 1.0.0\nstatus: draft\n'
+            'depends_on: [design/00-design-setup.md@1.0.0]\nopen_items: 0\nblocking: []\n'
+            'updated: 2026-10-18\n---\n# Design system: Ledgerly\n')
+        e, w, s = self.lint()
+        self.assertEqual(e, [])
+
+    def test_next_suggests_g04_only_when_planned(self):
+        nx = pdlc.compute_next(pdlc.Docs(self.root), "design")["design"]
+        self.assertFalse(any(x == "design-04-design-system" for x, _, _ in nx), nx)
+        self.edit(TR, "  design_stage: true\n", "  design_stage: true\n  design_system: planned\n")
+        nx = pdlc.compute_next(pdlc.Docs(self.root), "design")["design"]
+        self.assertTrue(any(x == "design-04-design-system" for x, _, _ in nx), nx)
+
     def test_next_product_when_stories_draft(self):
         self.edit(STORIES, "status: approved", "status: draft")
         nx = pdlc.compute_next(pdlc.Docs(self.root), "product")["product"]

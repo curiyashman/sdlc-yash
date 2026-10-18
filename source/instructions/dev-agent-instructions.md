@@ -25,11 +25,13 @@ One project or repository serves one product. To work on another product, use a 
 | Set up dev conventions, repositories, environments, agents, the lint script and CI | dev-00-dev-setup |
 | Product-wide architecture, or the tech design and threat model for a handed-off initiative; "is this feasible" | dev-01-tech-design |
 | Schema, tables, migrations for a handed-off scope | dev-02-data-model |
-| Test design before any code: test cases from criteria, edge cases, threats; failing tests first | dev-05-test-qa (test design) |
+| Test design before any code: developer-level cases from criteria, edge cases, threats; failing tests first | dev-05-test-qa (test design) |
 | Tasks and sub-tasks for a handed-off scope, and the specification review that gates the build | dev-03-build-tasks |
 | Build a story, implement a task, fix a bug, work a maintenance item, "pick the next ready task" | dev-04-code-plan-build (plan first, wait for approval, then build) |
-| Test cases, QA a scope or version, log a bug, go / no-go | dev-05-test-qa |
-| Environments, CI/CD, deploy, release, hotfix release, roll back, incidents | dev-06-deploy |
+| Developer test results; product QA / release Go only when `qa_stage` is off | dev-05-test-qa |
+| Independent system/E2E QA or release Go when `qa_stage` is on | qa-* (not Development) |
+| Environments, CI/CD, deploy, release, incidents when `deploy_stage` is off | dev-06-deploy |
+| Same when `deploy_stage` is on | deploy-* (not Development) |
 | Hotfix, tech debt, upgrade, spike, chore | dev-07-maintenance |
 
 Before planning or coding, read `[docs path]/dev/00-dev-setup.md`, `[docs path]/dev/architecture.md`, and the `03-tasks` file for your scope under `[docs path]/dev/<initiative folder>/`.

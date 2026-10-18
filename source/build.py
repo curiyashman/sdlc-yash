@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """Builds the installable skills from source/.
 
-  python source/build.py          write Product/, Design/, Development/, Common/
+  python source/build.py          write Product/, Design/, Development/, QA/, Deployment/, Security/, Common/
   python source/build.py --check  fail if the built folders differ from source (used by CI)
 
 Each skill folder gets:
-  SKILL.md                    source/skills/<name>.md with {{CORE}} replaced by source/core.md
+  SKILL.md                    source/skills/<name>.md with {{CORE}} replaced by
+                              source/core.md (or source/core-security.md for sec-*)
   references/conventions.md   source/conventions.md (read on demand)
   references/<pack>           the packs this skill needs (see PACKS)
   scripts/pdlc.py             tools/pdlc.py
@@ -19,25 +20,60 @@ import tempfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
-TEAMS = {"product-": "Product", "design-": "Design", "dev-": "Development", "pdlc-": "Common"}
+TEAMS = {"product-": "Product", "design-": "Design", "dev-": "Development", "qa-": "QA",
+         "deploy-": "Deployment", "sec-": "Security", "pdlc-": "Common"}
 PACKS = {
     "compliance.md": ["product-00-product-context", "product-02-prd", "product-04-user-stories",
-                      "dev-01-tech-design", "dev-05-test-qa"],
+                      "design-04-design-system", "dev-01-tech-design", "dev-05-test-qa", "qa-01-test-plan",
+                      "deploy-04-observability-sre", "deploy-05-incident-response"],
     "threat-model.md": ["dev-01-tech-design", "dev-03-build-tasks", "dev-05-test-qa", "dev-07-maintenance"],
-    "ai-features.md": ["product-02-prd", "product-04-user-stories", "design-02-screen-mockups",
+    "ai-features.md": ["product-02-prd", "product-04-user-stories", "design-02-screen-mockups", "design-04-design-system",
                        "dev-01-tech-design", "dev-03-build-tasks", "dev-04-code-plan-build",
-                       "dev-05-test-qa", "dev-06-deploy", "dev-07-maintenance"],
-    "ci-pdlc-lint.yml": ["product-00-product-context", "dev-00-dev-setup", "pdlc-next"],
+                       "dev-05-test-qa", "qa-01-test-plan", "qa-04-nonfunctional-testing",
+                       "deploy-03-release", "deploy-04-observability-sre", "dev-07-maintenance"],
+    "design-system-references.md": ["design-04-design-system"],
+    "responsive-platforms.md": ["design-00-design-setup", "design-01-sitemap-flows", "design-02-screen-mockups",
+                                "design-03-design-handoff", "design-04-design-system", "qa-01-test-plan",
+                                "qa-04-nonfunctional-testing"],
+    # Every non-Security product skill that the pack's team tables name. Intentional omits:
+    # sec-* (use core-security + security-methodology/jurisdictions); pdlc-next (dispatcher only).
+    "secure-by-design.md": ["product-00-product-context", "product-01-feature-brainstorm", "product-02-prd",
+                            "product-03-ux-flows", "product-04-user-stories", "product-05-change-request",
+                            "product-06-project-tracker", "product-07-launch",
+                            "design-00-design-setup", "design-01-sitemap-flows", "design-02-screen-mockups",
+                            "design-03-design-handoff", "design-04-design-system",
+                            "dev-00-dev-setup", "dev-01-tech-design", "dev-02-data-model", "dev-03-build-tasks",
+                            "dev-04-code-plan-build", "dev-05-test-qa", "dev-06-deploy", "dev-07-maintenance",
+                            "qa-00-qa-setup", "qa-01-test-plan", "qa-02-test-execution", "qa-03-release-signoff",
+                            "qa-04-nonfunctional-testing",
+                            "deploy-00-deploy-setup", "deploy-01-environments", "deploy-02-pipeline",
+                            "deploy-03-release", "deploy-04-observability-sre", "deploy-05-incident-response"],
+    "qa-techniques.md": ["qa-00-qa-setup", "qa-01-test-plan", "qa-02-test-execution", "qa-03-release-signoff",
+                         "qa-04-nonfunctional-testing"],
+    "deploy-platforms.md": ["deploy-00-deploy-setup", "deploy-01-environments", "deploy-02-pipeline",
+                            "deploy-03-release"],
+    "deploy-methods.md": ["deploy-03-release", "deploy-05-incident-response", "deploy-02-pipeline"],
+    "observability-sre.md": ["deploy-04-observability-sre", "deploy-05-incident-response", "deploy-01-environments"],
+    "security-methodology.md": ["sec-00-engagement-scope", "sec-01-attack-surface", "sec-02-vulnerability-assessment",
+                                "sec-03-privacy-compliance-audit", "sec-04-audit-report-remediation",
+                                "sec-05-retest-signoff"],
+    "security-jurisdictions.md": ["sec-00-engagement-scope", "sec-03-privacy-compliance-audit",
+                                  "sec-04-audit-report-remediation"],
+    "ci-pdlc-lint.yml": ["product-00-product-context", "dev-00-dev-setup", "deploy-02-pipeline", "pdlc-next"],
 }
 INSTRUCTIONS = {  # extra files copied into team folders
     "instructions/product-project-instructions.md": "Product/claude-project-instructions.md",
     "instructions/design-agent-instructions.md": "Design/agent-instructions.md",
     "instructions/dev-agent-instructions.md": "Development/agent-instructions.md",
+    "instructions/qa-agent-instructions.md": "QA/agent-instructions.md",
+    "instructions/deploy-agent-instructions.md": "Deployment/agent-instructions.md",
+    "instructions/security-agent-instructions.md": "Security/agent-instructions.md",
 }
 
 
 def build(out):
     core = open(os.path.join(HERE, "core.md")).read().strip("\n")
+    core_sec = open(os.path.join(HERE, "core-security.md")).read().strip("\n")
     problems = []
     names = []
     for fn in sorted(os.listdir(os.path.join(HERE, "skills"))):
@@ -49,7 +85,7 @@ def build(out):
         text = open(os.path.join(HERE, "skills", fn)).read()
         if text.count("{{CORE}}") != 1:
             problems.append(f"{name}: needs exactly one {{{{CORE}}}}")
-        text = text.replace("{{CORE}}", core)
+        text = text.replace("{{CORE}}", core_sec if name.startswith("sec-") else core)
         m = re.match(r'---\nname: (.+)\ndescription: "(.+)"\n---\n', text)
         if not m or m.group(1) != name:
             problems.append(f"{name}: frontmatter name must match the file name")
@@ -79,7 +115,7 @@ def build(out):
         for dp, _, fns in os.walk(os.path.join(out, team)):
             for fn in fns:
                 if fn.endswith(".md"):
-                    for ref in re.findall(r"\b((?:product|design|dev)-0\d-[a-z-]+[a-z]|pdlc-next)\b", open(os.path.join(dp, fn)).read()):
+                    for ref in re.findall(r"\b((?:product|design|dev|qa|deploy|sec)-0\d-[a-z-]+[a-z]|pdlc-next)\b", open(os.path.join(dp, fn)).read()):
                         if ref not in names:
                             problems.append(f"{os.path.relpath(os.path.join(dp, fn), out)}: names unknown skill {ref}")
     return names, problems

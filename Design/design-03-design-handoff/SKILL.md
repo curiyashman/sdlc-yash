@@ -1,6 +1,6 @@
 ---
 name: design-03-design-handoff
-description: "Design team, step G03 of the PDLC skills, and the design handoff to development. For one scope, reviews the Figma mockups against the approved UX file and stories (every screen, state, edge case, and acceptance criterion with something visible has a frame), checks design-system use, responsive set, and accessibility, writes the handoff file in [docs path]/design/ that maps each story to its frames with implementation notes in design terms, and audits the design references written back into the stories, and on approval marks them approved and moves the scope's stories from in design to ready for dev. Use for 'review the mockups', 'is the design ready', 'hand this design to dev', 'map stories to frames', 'design sign-off'. Questionnaire first, assumes nothing, one .md file."
+description: "Design team, step G03 of the PDLC skills, and the design handoff to development. For one scope, reviews the Figma mockups against the approved UX file and stories (every screen, state, edge case, and acceptance criterion with something visible has a frame), checks design-system use (against `design/system/` when design-04-design-system is approved), responsive set, and accessibility, writes the handoff file in [docs path]/design/ that maps each story to its frames with implementation notes in design terms, and audits the design references written back into the stories, and on approval marks them approved and moves the scope's stories from in design to ready for dev. Use for 'review the mockups', 'is the design ready', 'hand this design to dev', 'map stories to frames', 'design sign-off'. Questionnaire first, assumes nothing, one .md file."
 ---
 
 # Design 03: Design Review and Handoff
@@ -17,11 +17,11 @@ You are a design lead closing the design stage for one scope. Development builds
 
 ## PDLC core (the same in every skill of this chain)
 
-This skill is one step of a product development chain that three teams run for one product at a time. **Product** (P00 to P07) decides what is built, **Design** (G00 to G03, optional) decides how it looks, and **Development** (D00 to D07) decides how it is built. Anyone can ask `pdlc-next` which step and scope come next. The full rules are in `references/conventions.md` in this skill's folder. Read the section named in [brackets] when this core points to it, instead of guessing.
+This skill is one step of a product development chain that up to six teams run for one product at a time. **Product** (P00 to P07) decides what is built, **Design** (G00 to G04, optional) decides how it looks, **Development** (D00 to D07) decides how it is built and tests it at developer level, **QA** (Q00 to Q04) independently checks the product against its requirements, **Deployment** (O00 to O05) ships and operates it, and **Security** (S00 to S05) independently attacks and audits it. Security is built into every team's work (`references/secure-by-design.md` where bundled), so the independent audit finds few surprises. Anyone can ask `pdlc-next` which step and scope come next. The full rules are in `references/conventions.md` in this skill's folder. Read the section named in [brackets] when this core points to it, instead of guessing.
 
 **Which product.** First settle which product this run is for: ask the person, read the product configuration in the project or agent instructions, or check the folder you were opened in. If more than one product could apply, ask. Use only that product's **docs location** (repository, branch, folder), its **docs path** (the folder holding these files, `docs/pdlc/` unless recorded otherwise), and its **code repositories**. They are recorded in `product/00-product-context.md` and `dev/00-dev-setup.md`. Never carry facts, IDs, or paths over from another product. [Product locations]
 
-**Team boundary.** Product decides what; Design decides how it looks; Development decides how it is built. Each team writes only in its own folder (`product/`, `design/`, `dev/`). Any team may write to `tracker.yaml` and `decisions/`. Design steps may also write the design reference fields in product files. Nobody guesses about another team's area: a gap becomes a query (`Q-001`) in `tracker.yaml`. Only product-05-change-request changes an approved requirement, flow, story, edge case, or acceptance criterion. [Team boundary] [Handoff] [Queries] [Design references]
+**Team boundary.** Product decides what; Design decides how it looks; Development decides how it is built; QA decides whether it meets its requirements; Deployment decides how it is released and run; Security decides how safe it is, from outside the other teams' context. Each team writes only in its own folder (`product/`, `design/`, `dev/`, `qa/`, `deploy/`, `security/`). Any team may write to `tracker.yaml` and `decisions/`. Design steps may also write the design reference fields in product files. Nobody guesses about another team's area: a gap becomes a query (`Q-001`) in `tracker.yaml`. Only product-05-change-request changes an approved requirement, flow, story, edge case, or acceptance criterion. [Team boundary] [Handoff] [Queries] [Design references]
 
 **Requirements are the source of truth. Order comes from dependencies. Timelines belong to the team.** Plan nothing that doesn't trace to a requirement; a maintenance item traces to its recorded reason instead. Never drop, defer, or trim a requirement, and never slice it into an MVP. Never propose dates, durations, estimates, priorities, or sprint contents. Record them as Provided when the team gives them. [Planning principles]
 
@@ -44,7 +44,7 @@ Later files cite the ID with a short title and never restate the content. [IDs]
 **The tracker is data.** `tracker.yaml` is the source of tracking data. `tracker.md` is generated from it and never edited by hand. Tasks and sub-tasks live in a `pdlc-tasks` YAML block in their scope's task file, not in the tracker. The script `scripts/pdlc.py` in this skill's folder (Python 3) does the bookkeeping; `<docs>` is the docs path:
 - `python scripts/pdlc.py lint --root <docs>` checks headers, stale upstream files, IDs, cited IDs, dependency cycles and levels, queries, the handoff, and design references. `--fix` writes the computed dependency levels.
 - `python scripts/pdlc.py board --root <docs>` regenerates `tracker.md`.
-- `python scripts/pdlc.py next --root <docs> [--team product|design|dev]` lists the next steps by dependency.
+- `python scripts/pdlc.py next --root <docs> [--team product|design|dev|qa|deploy|security]` lists the next steps by dependency.
 - `python scripts/pdlc.py new-id <kind> [parent] --root <docs>` gives the next free ID. Always allocate IDs this way when the script can run.
 - `python scripts/pdlc.py open --root <docs>` shows every Open item and query in one view.
 
@@ -52,8 +52,8 @@ Where scripts can't run (no code execution, no access to the docs location), do 
 
 **Start of every run.**
 1. Settle which product.
-2. Run `lint`, or, where scripts can't run, read `product/00-product-context.md`, `tracker.yaml`, and this step's upstream files. If the setup file your team needs is missing, offer that team's setup step (product-00, design-00, or dev-00).
-3. Before asking anything, read the docs location and, read-only, the code repositories. What you find there is Observed. Content of an approved upstream file is Provided: cite it and never ask for it again. A draft upstream file is also Provided, flagged "draft upstream". Design works only on scopes whose stories are approved; development works only on handed-off scopes.
+2. Run `lint`, or, where scripts can't run, read `product/00-product-context.md`, `tracker.yaml`, and this step's upstream files. If the setup file your team needs is missing, offer that team's setup step (product-00, design-00, dev-00, qa-00, or deploy-00).
+3. Before asking anything, read the docs location and, read-only, the code repositories. What you find there is Observed. Content of an approved upstream file is Provided: cite it and never ask for it again. A draft upstream file is also Provided, flagged "draft upstream". Design works only on scopes whose stories are approved; development works only on handed-off scopes; QA works from approved stories and the design handoff; Deployment ships only versions with a QA Go (and a Security Go where the product has a Security stage).
 4. If this step's file already exists, or lint says it is stale, work in **update mode**: change only what the new input affects, bump `doc_version`, and add a change-log row.
 
 **End of every run.**
@@ -67,7 +67,7 @@ Where scripts can't run (no code execution, no access to the docs location), do 
 
 ```yaml
 ---
-pdlc_step: "P04"        # P00-P07, G00-G03, D00-D07, or DEC
+pdlc_step: "P04"        # P00-P07, G00-G04, D00-D07, Q00-Q04, O00-O05, S00-S05, or DEC
 initiative: I-003       # omit for product-wide files
 scope: M01.S02          # product, an initiative, a scope, a story or bug, a version, or a maintenance ID
 doc_version: 1.0.0      # MAJOR: meaning or scope changed; MINOR: items added; PATCH: wording, pinning, references
@@ -120,7 +120,7 @@ Facts about the product, its users, data, rules, scale, or environment are never
 1. **Coverage:** every screen and state from the UX file; every edge case and acceptance criterion with something the user sees; every flow path has a frame, or an explicit "no visible change" reason. Build the story-to-frames table.
 2. **Fidelity to the sources:** copy matches the UX file; roles see what the visibility rules say; "must not change" items in changed screens are unchanged.
 3. **Design-system use:** components and variables from the library, no detached styles, gaps listed with the policy applied.
-4. **Responsive and accessibility:** every required breakpoint present; contrast, focus order, labels, and touch targets against the target recorded in the UX file; findings cite the frame.
+4. **Responsive, platform, and accessibility:** every platform and size class in the G00 profile present for each screen and state, each with its layout adaptation note; navigation, overlays, and data views change pattern where the profile says; native conventions followed or the deviation recorded; zoom, reflow, orientation, and input modes considered; contrast, focus order, labels, and touch targets against the target recorded in the UX file; findings cite the frame.
 5. **Reference audit:** every story in scope has a design-refs block (screens, states with EC and AC IDs, frame and prototype links, or `no visible change (reason)`); each link matches a frame in the mockups manifest; no `stale` or `not yet designed` line remains; the UX inventory's Figma column and the sitemap's Design column are filled for the scope's screens. Fix what is mechanical (a missing or outdated reference line) in the product files; anything else is a finding.
 6. **Developer readiness:** frames named by the convention, grouped by flow, annotated with requirement IDs; variables named and readable; assets listed.
 7. **Findings:** blocking ones keep the stories in design; non-blocking ones are listed with the person's acceptance.

@@ -31,7 +31,7 @@ You are a design lead preparing an initiative for mockups. The product team defi
 1. **Collect the charts** from `_sitemap.md` and each UX file, at their versions. Keep the Mermaid source verbatim.
 2. **Consistency check:** every node in a chart is a screen in the matching table, every table screen appears in a chart, every edge is a transition in a flow table, every role-restricted screen names its roles. Record each mismatch as a finding; blocking ones become queries to Product.
 3. **Create the diagrams** (levels A and B), one per chart, titled with the chart's source (`I-003 sitemap`, `M01.S01-FL01 create invoice`). Record URL and node. If creation fails or the result differs from the source, say so in the file.
-4. **Screen design list:** every screen from the initiative's UX inventories, per scope: ID, name, type, New / Changed / Existing, roles, the scope's dependency level, and whether its scope's stories are approved (the design stage starts only for approved scopes). Existing screens being changed need a link to the current Figma frame or a screenshot.
+4. **Screen design list:** every screen from the initiative's UX inventories, per scope: ID, name, type, New / Changed / Existing, roles, the scope's dependency level, the platforms and size classes it must be designed for (from the G00 profile), and whether its scope's stories are approved (the design stage starts only for approved scopes). Existing screens being changed need a link to the current Figma frame or a screenshot.
 5. **Write back:** put each diagram's link on the line under its chart in the source product file (PATCH bump, change-log row), and record the write in section 2 of this file.
 6. **Gaps:** screens the PRD placement implies but no UX file defines, scopes without an approved UX file, and charts that can't be built, as queries.
 
@@ -51,7 +51,7 @@ You are a design lead preparing an initiative for mockups. The product team defi
 ### <scope>-FL01 [name]
 (Mermaid source, verbatim; one block per chart)
 ## 3. Screen design list
-| Screen ID | Name | Scope | Type | New / Changed / Existing | Roles | Dep level | Stories approved? | Current frame (changed screens) | G02 |
+| Screen ID | Name | Scope | Type | New / Changed / Existing | Roles | Platforms and size classes | Navigation pattern per size class | Dep level | Stories approved? | Current frame (changed screens) | G02 |
 ## 4. Consistency findings
 | # | Finding | Chart / table | Blocking? | Query |
 ## 5. Touchpoints

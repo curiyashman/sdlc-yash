@@ -19,38 +19,69 @@ This file holds the full rules that the PDLC core in each SKILL.md summarizes. R
 | Design | G01 | design-01-sitemap-flows | one initiative | `design/I-<nnn>-<slug>/01-sitemap-flows.md` + FigJam charts |
 | Design | G02 | design-02-screen-mockups | one scope | `design/I-<nnn>-<slug>/02-mockups/<scope>-<slug>.md` + frames or HTML prototype |
 | Design | G03 | design-03-design-handoff | one scope | `design/I-<nnn>-<slug>/03-handoff/<scope>-<slug>.md` (the design handoff) |
+| Design | G04 | design-04-design-system | product (optional) | `design/04-design-system.md` (audit and proposal), then `design/system/` (foundations, token sources, component and pattern specs) |
 | Development | D00 | dev-00-dev-setup | product | `dev/00-dev-setup.md` |
 | Development | D01 | dev-01-tech-design | baseline, then one initiative | `dev/architecture.md`; `dev/I-<nnn>-<slug>/01-tech-design.md` |
 | Development | D02 | dev-02-data-model | one handed-off scope | `dev/I-<nnn>-<slug>/02-data-model/<scope>-<slug>.md`, `dev/_shared-entities.md` |
 | Development | D03 | dev-03-build-tasks | one handed-off scope | `dev/I-<nnn>-<slug>/03-tasks/<scope>-<slug>.md` (`pdlc-tasks` blocks and the specification review) |
 | Development | D04 | dev-04-code-plan-build | one story, bug, or maintenance item | `dev/I-<nnn>-<slug>/04-build/<id>-plan.md` (or `dev/maintenance/<id>-plan.md`), plus code |
 | Development | D05 | dev-05-test-qa | one scope (test design first, results later) or version | `dev/I-<nnn>-<slug>/05-qa/<scope>-<slug>.md` or `dev/releases/<version>-qa.md` |
-| Development | D06 | dev-06-deploy | one version or event | `dev/releases/<version-or-event>.md` |
+| Development | D06 | dev-06-deploy | one version or event (when Deployment stage is off) | `dev/releases/<version-or-event>.md` |
 | Development | D07 | dev-07-maintenance | one maintenance item | `dev/maintenance/<id>-<slug>.md` |
+| QA | Q00 | qa-00-qa-setup | product (when QA stage is on) | `qa/00-qa-setup.md` |
+| QA | Q01 | qa-01-test-plan | one scope | `qa/I-<nnn>-<slug>/01-test-plan/<scope>-<slug>.md` |
+| QA | Q02 | qa-02-test-execution | one scope | `qa/I-<nnn>-<slug>/02-results/<scope>-<slug>.md` |
+| QA | Q03 | qa-03-release-signoff | one version | `qa/releases/<version>-signoff.md` |
+| QA | Q04 | qa-04-nonfunctional-testing | product, scope, or version | `qa/nfr/<slug>.md` |
+| Deployment | O00 | deploy-00-deploy-setup | product (when Deployment stage is on) | `deploy/00-deploy-setup.md` |
+| Deployment | O01 | deploy-01-environments | product | `deploy/01-environments.md` |
+| Deployment | O02 | deploy-02-pipeline | product | `deploy/02-pipeline.md` |
+| Deployment | O03 | deploy-03-release | one version | `deploy/releases/<version>.md` |
+| Deployment | O04 | deploy-04-observability-sre | product | `deploy/04-observability-sre.md` |
+| Deployment | O05 | deploy-05-incident-response | one incident or hotfix | `deploy/incidents/…` or a patch release file |
+| Security | S00 | sec-00-engagement-scope | one engagement | `security/<engagement>/00-engagement.md` |
+| Security | S01 | sec-01-attack-surface | one engagement | `security/<engagement>/01-attack-surface.md` |
+| Security | S02 | sec-02-vulnerability-assessment | one engagement | `security/<engagement>/02-vulnerabilities.md` |
+| Security | S03 | sec-03-privacy-compliance-audit | one engagement | `security/<engagement>/03-privacy-compliance.md` |
+| Security | S04 | sec-04-audit-report-remediation | one engagement | `security/<engagement>/04-report.md` |
+| Security | S05 | sec-05-retest-signoff | one engagement or version | `security/<engagement>/05-retest-signoff.md` |
 | Any | DEC | (written by any step) | one decision | `decisions/DEC-<nnn>-<slug>.md` |
 
 ## Flow
 
 - **Product:** P00 once. Then, per initiative, P01 and P02. Then, per scope, P03 and P04.
-- **Design** (when the product has a design stage): G00 once. Then G01 per initiative, then G02 and G03 per scope.
+- **Design** (when the product has a design stage): G00 once. G04 once, optional (the design system; its approved phases are built by development as M00 foundations). Then G01 per initiative, then G02 and G03 per scope.
 - **Development:** D00 and the D01 baseline once. Then D01 per initiative. Per handed-off scope:
   1. D02, the data model.
-  2. D05 in test-design mode: test cases written from the acceptance criteria, edge cases, and threats, before any code.
+  2. D05 in test-design mode: developer-level test cases (unit, integration, contract) from acceptance criteria, edge cases, and threats, before any code.
   3. D03, the tasks plus the specification review, which approves the design, criteria, constraints, and tests together.
   4. D04 per story: the agent builds in a sandbox until the approved tests pass.
-  5. D05 again, recording results.
+  5. D05 again for developer-level results. When the QA stage is on, stories then move to `in_qa` for independent QA (Q01–Q02); D05 does not issue the release Go.
+- **QA** (when `config.qa_stage: true`): Q00 once. Q01 may start once stories are approved (in parallel with build). Q02 runs when stories are `in_qa`. Q03 is the release Go / No-go in pre-production. Q04 covers non-functional work as needed.
+- **Deployment** (when `config.deploy_stage: true`): O00 once, then O01 environments and O02 pipeline; O04 observability when environments exist. O03 runs releases. O05 handles incidents. When this stage is on, D06 is not used for release or incident work (except as a pointer to Deployment).
+- **Security** (when `config.security_stage: true`): independent engagements S00–S05. Security does not read other teams' docs for findings. A Security Go (S05) is required before production promote when the stage is on.
 
-**Release order:**
+**Ownership when stages are off (default for small teams):** developer tests and release Go stay in D05; environments, CI/CD, release, and incidents stay in D06. Turning a stage on moves that work to the matching team without rewriting history: new work follows the new path.
+
+**Release order (Deployment and QA stages off):**
 1. The team chooses a version's items, and P06 checks them against dependencies.
 2. D06 deploys the version to pre-production.
-3. D05 tests it there.
+3. D05 tests it there and issues Go / No-go.
 4. D06 promotes it to production on a Go.
 5. P07 prepares the launch kit for the released version.
+
+**Release order (Deployment and QA stages on):**
+1. P06 checks the version's items.
+2. O03 deploys the version to pre-production (`status: staged`).
+3. Q03 (and S05 when the Security stage is on) issues Go / No-go.
+4. O03 promotes to production only after those Go verdicts and recorded approval.
+5. P07 prepares the launch kit.
 
 **Any time:**
 - P05 handles change requests.
 - P06 handles tracking.
 - D07 handles maintenance items: hotfixes, tech debt, upgrades, spikes, and chores.
+- O05 (or D06 when Deployment stage is off) handles incidents.
 - pdlc-next answers "what next".
 
 ## Product locations
@@ -67,11 +98,27 @@ The skills name no repository. Every product has its own locations, and every ru
 
 ## Team boundary
 
-**Product decides what; Design decides how it looks and is laid out; Development decides how it is built.**
+Product decides what; Design decides how it looks; Development decides how it is built and tests it at developer level; QA decides whether the product meets its requirements independently; Deployment decides how it is released and run; Security decides how safe it is from outside the other teams' context. Each team writes only in its own folder (`product/`, `design/`, `dev/`, `qa/`, `deploy/`, `security/`). Any team may write to `tracker.yaml` and `decisions/`. Design steps may also write the design reference fields in product files. Nobody guesses about another team's area: a gap becomes a query (`Q-001`) in `tracker.yaml`. Only product-05-change-request changes an approved requirement, flow, story, edge case, or acceptance criterion.
+
+**Stage flags** in `tracker.yaml` `config` (default off unless the matching setup file is approved):
+| Flag | When true |
+|---|---|
+| `design_stage` | Design team (G00–G04) is in the chain |
+| `qa_stage` | Independent QA (Q00–Q04) owns system/E2E tests and release Go |
+| `deploy_stage` | Deployment team (O00–O05) owns environments, pipelines, release, incidents |
+| `security_stage` | Security engagements (S00–S05) run; production promote needs a Security Go |
+
+When a stage is off, Development keeps the overlapping work (D05 for product-level QA and release Go; D06 for deploy/incident). Skills on both sides must state this handoff; do not run both full paths for the same release.
+
+## Team boundary (detail)
+
 - **Product files** state problems, scope, requirements, business rules, flows, screens, stories, edge cases, and acceptance criteria. They never choose technology, architecture, schema, APIs, or implementation, unless a Provided constraint requires it.
 - **Design files and frames** show the screens, states, and visual structure of what Product defined. They never add, drop, or change a feature, role, rule, flow, Product-provided copy, or acceptance criterion, and they never choose technology.
-- **Development files** decide architecture, schema, tasks, code, tests, infrastructure, and releases. They never change product behavior, scope, requirements, flows, edge-case behavior, or acceptance criteria.
-- **Where each team writes:** in its own folder (`product/`, `design/`, `dev/`). Any team may write to `tracker.yaml` and `decisions/`. The one bounded exception is the design reference fields in product files (see Design references). Product owns the structure of `tracker.yaml`: versions, queries, change requests, and statuses.
+- **Development files** decide architecture, schema, tasks, code, developer-level tests, and (when Deployment stage is off) infrastructure and releases. They never change product behavior, scope, requirements, flows, edge-case behavior, or acceptance criteria.
+- **QA files** decide independent system/E2E tests, regression, and release Go / No-go when the QA stage is on. They never invent expected results; unclear criteria become queries to Product.
+- **Deployment files** decide environments, pipelines, release execution, observability, and incidents when the Deployment stage is on.
+- **Security files** record independent engagements and findings. Security does not fix the system and does not derive findings from other teams' docs.
+- **Where each team writes:** in its own folder (`product/`, `design/`, `dev/`, `qa/`, `deploy/`, `security/`). Any team may write to `tracker.yaml` and `decisions/`. The one bounded exception is the design reference fields in product files (see Design references). Product owns the structure of `tracker.yaml`: versions, queries, change requests, and statuses.
 
 ## Handoff
 
@@ -103,7 +150,7 @@ queries:
     question: Can a bulk send mix currencies?
     about: [M01.S02.F01-US02]
     raised_by: D01         # step that raised it
-    to: product            # product | design | dev
+    to: product            # product | design | dev | qa | deploy | security
     blocking: true
     status: open           # open | answered | became_cr
     answer:                # file@version that answers it, or the CR ID
@@ -281,7 +328,7 @@ Environment names come from `dev/00-dev-setup.md`, where each environment is mar
 
 | Step | Covers |
 |---|---|
-| P00, G00, D00 | the whole product |
+| P00, G00, G04, D00 | the whole product (G04 component and pattern specs: `foundations`, `component-<name>`, `pattern-<name>`) |
 | P01, P02, G01, D01 | one initiative |
 | P03, P04, G02, G03, D02, D03 | one scope (a module, sub-module, or feature from the initiative's PRD) |
 | D04 | one story, bug, or maintenance item |
@@ -327,7 +374,10 @@ Every chain file starts with the front matter shown in the core and ends with a 
 # tracker.yaml
 product: Ledgerly
 config:
-  design_stage: true            # whether the product has a design stage
+  design_stage: true            # Design team G00–G04
+  qa_stage: false               # Independent QA Q00–Q04 (release Go); false = D05 owns product QA
+  deploy_stage: false           # Deployment O00–O05; false = D06 owns release/incident
+  security_stage: false         # Security S00–S05; false = no independent engagement gate
   version_scheme: semver
   statuses: {backlog: Backlog, in_definition: In definition, in_design: In design, ready_for_dev: Ready for dev,
              in_progress: In progress, in_review: In review, in_qa: In QA, done: Done, released: Released,
@@ -438,7 +488,7 @@ Work without a product requirement still has a route, through dev-07-maintenance
 
 - **Behavior changes go back to Product.** A maintenance item may not change product behavior. If it would, it raises a query to Product, or Product opens a CR.
 - **Hotfixes:** a hotfix may ship before its documents are complete, but it is not closed until its D07 file, its tests, and any product answer are recorded.
-- **Execution:** D04, D05, and D06 run maintenance work like a story, with the D07 file as its source.
+- **Execution:** D04 and D05 run maintenance work like a story, with the D07 file as its source. Shipping and incidents use D06 when `deploy_stage` is off, or Deployment (O03 / O05) when it is on.
 
 ## Reference packs
 
@@ -449,4 +499,13 @@ Some skills include extra reference files in `references/`. Read one only when i
 | `compliance.md` | the product handles personal data, payments, tax invoices, health or financial records, or operates in a regulated market. These are checklists of questions to verify against current official sources, never legal facts. |
 | `threat-model.md` | dev-01 designs an initiative or the baseline, or a change touches authentication, permissions, personal data, payments, or external input. |
 | `ai-features.md` | a feature uses AI models, from requirements (behavior, eval set, thresholds) to design, build, test, and operations. |
+| `secure-by-design.md` | every Product, Design, Development, QA, and Deployment step (bundled where listed in `source/build.py`). Security skills use `core-security.md` and the security packs instead. |
+| `responsive-platforms.md` | Design steps and QA plans that cover platforms, breakpoints, or size classes. |
+| `design-system-references.md` | design-04 (G04) research and audit. |
+| `qa-techniques.md` | any QA step (strategy, cases, defects, exit criteria, NFR testing). |
+| `deploy-platforms.md` | Deployment setup and environment/pipeline choices across web, containers, serverless, mobile, desktop, on-prem. |
+| `deploy-methods.md` | release, rollout, migration expand/contract, hotfix, and rollback choices. |
+| `observability-sre.md` | SLOs, signals, alerting, on-call, runbooks, and reliability work. |
+| `security-methodology.md` | every Security engagement step (authorization limits, methods, severity). |
+| `security-jurisdictions.md` | Security privacy/compliance audit and report steps when regimes or regions apply. |
 | `ci-pdlc-lint.yml` | setting up the CI check in a product's repository. |
