@@ -40,6 +40,7 @@ items:
     status: in_review
     depends_on: []
     dep_level: 0
+    depth: trunk
     source: product/I-001-bulk-invoicing/04-stories/M01.S02-bulk-actions.md
   - id: M01.S02.F01-US02
     type: story
@@ -50,6 +51,7 @@ items:
     status: ready_for_dev
     depends_on: [M01.S02.F01-US01]
     dep_level: 1
+    depth: trunk
     fix_version: v1.4.0
     source: product/I-001-bulk-invoicing/04-stories/M01.S02-bulk-actions.md
   - {id: TD-001, type: tech_debt, title: Invoice list query does a full scan, status: backlog, source: decisions/DEC-001-background-jobs.md, dep_level: 0}

@@ -288,7 +288,15 @@ Agents read code to answer questions, not to digest files. This follows the idea
   - Dependencies on existing features and on other initiatives count.
   - Items on the same level have no order between them.
   - `pdlc.py` computes the levels; nobody assigns them by hand.
-- **Timelines belong to the team.** No skill proposes dates, durations, deadlines, sprint contents, time-based phases, capacity, estimates, or priorities. When the team provides them, they are recorded as Provided and never change the dependency order.
+- **Tree, depth, and versions (structure ≠ cadence).** The product map is the tree (module → sub-module → feature → story). **Dependencies** decide build order. **Depth** (team-set on stories) draws the divider line for what belongs in an early vs later harvest without deleting requirements from the PRD:
+  | Depth | Meaning | Typical place |
+  |---|---|---|
+  | `foundation` | M00 / design foundations / shared shell | first internal versions |
+  | `trunk` | Happy path — core user outcome end-to-end | next shippable version |
+  | `branch` | Good-to-have on the same feature | following versions |
+  | `leaf` | Advanced / deeper / power paths | later |
+  Depth never overrides `depends_on`. A version should prefer a complete **trunk** (plus its deps) before packing **branch**/**leaf** stories of the same feature. Record depth in `tracker.yaml` (`depth:`); optional shorthand in priority notes is fine if the team already uses priorities that way.
+- **Timelines belong to the team.** No skill proposes dates, durations, deadlines, sprint contents, time-based phases, capacity, estimates, or priorities. When the team provides them (including depth and `fix_version`), they are recorded as Provided and never change the dependency order.
 
 ## Initiatives
 
@@ -435,13 +443,14 @@ items:                          # modules, sub-modules, features, stories, bugs,
     status: ready_for_dev       # a role key
     depends_on: [M01.S02.F01-US01]
     dep_level: 1                # written by pdlc.py lint --fix
-    fix_version:                # team-set only
+    depth: trunk                # team-set: foundation | trunk | branch | leaf (harvest ring; optional)
+    fix_version:                # team-set only — which version ships this item
     priority:                   # team-set only
     estimate:                   # team-set only
     source: product/I-001-bulk-invoicing/04-stories/M01.S02-bulk-actions.md
 queries: []                     # see Queries
 versions:
-  - {id: v1.4.0, goal: Bulk send, status: planned, file: }   # planned | in_progress | staged | released | rolled_back
+  - {id: v1.4.0, goal: Bulk send (trunk), status: planned, file: }   # planned | in_progress | staged | released | rolled_back
 sprints: []                     # only if the team uses sprints; every field team-set
 change_requests:
   - {id: CR-001, title: , initiative: I-001, status: draft, file: }   # draft | approved | applied | rejected

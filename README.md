@@ -27,7 +27,7 @@ Every skill proposes answers for the person to confirm and assumes nothing. Each
   | `qa_stage` / `deploy_stage` / `security_stage` | Independent teams when true |
 
   Do not run both the Dev compat path and the staged path for the same release.
-- **Requirements are the single source of truth.** Every initiative covers its full scope; no MVP slicing is applied by default. Order comes only from dependencies (stories drafted Level 0 → N). Timelines, priorities, and estimates belong to the team. Lint blocks `ready_for_dev`+ when upstream stories are not yet handed off.
+- **Requirements are the single source of truth.** Every initiative covers its full scope; no MVP slicing is applied by default. Order comes only from dependencies (stories drafted Level 0 → N). **Depth** (`foundation` / `trunk` / `branch` / `leaf`) and **`fix_version`** cut harvests without deleting requirements — big tree, thin releases. Timelines, priorities, and estimates belong to the team. Lint blocks `ready_for_dev`+ when upstream stories are not yet handed off.
 - **Reference by ID, don't copy.** Each kind of fact has one owner file:
 
   | Fact | IDs | Owner |

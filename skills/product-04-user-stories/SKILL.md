@@ -127,6 +127,7 @@ Facts about the product, its users, data, rules, scale, or environment are never
 2. **Edge-case analysis.** Before writing any acceptance criterion, list each feature's edge cases with the checklist below. For each, look for the expected behavior in the PRD and the UX file. Where none defines it, propose a behavior on the confirm sheet (questionnaire step 3). Record every edge case in the feature's register.
 3. **Acceptance criteria.** Only now write them: the happy path, every edge case with a defined behavior (citing its EC ID), the error, empty, and loading states, and, for changed features (especially brownfield), the existing behavior that must not change (marked "unchanged").
 4. **Handshake and dependencies.** Fill each story's product handshake and its Depends on (story IDs and/or existing released feature IDs). Derive dependency levels with `pdlc.py lint --fix`. **Draft and list stories in dependency order: Level 0 first, then 1, then N** — never feature-ID order when that disagrees with deps. Section 5 of the output must match each story's `depends_on` in `tracker.yaml`.
+4b. **Depth (harvest ring).** With the person, tag each story `foundation` | `trunk` | `branch` | `leaf` (conventions [Tree, depth, and versions]). Trunk = happy path; branch = good-to-have; leaf = advanced/deeper. Record in `tracker.yaml` (`depth:`). Depth does not change Depends on or Level; it only guides which stories the team puts in the next `fix_version` (P06). Keep the full tree in the PRD — do not drop branch/leaf from the stories file just to shrink a release.
 5. **Handoff.** Check every story against the ready-for-dev definition, then write the handoff section. Do not mark a story ready for build while an upstream story it Depends on is still below `ready_for_dev` (lint enforces this).
 
 **Edge-case checklist** (use it to find edge cases, never to decide their behavior):
@@ -173,7 +174,7 @@ As a [role], I want [capability], so that [outcome].
 | Edge cases | EC01, EC02, EC04 |
 | Depends on | story / released feature IDs |
 
-Status / dep_level / priority / estimate → `tracker.yaml` only.
+Status / dep_level / depth / fix_version / priority / estimate → `tracker.yaml` only.
 
 Acceptance criteria (Given/When/Then; cite verifies FR/BR/EC; no PRD restatement)
 - AC01 (verifies FR01): …
@@ -221,8 +222,8 @@ What this scope adds or changes vs what must stay the same. Unchanged column lis
 ## 4. Stories by feature
 (stories in the template — Level 0 → N across the file)
 ## 5. Dependency order
-| Dep level | Stories | Depends on |
-Must match `tracker.yaml` `depends_on`.
+| Dep level | Stories | Depends on | Depth (foundation / trunk / branch / leaf) |
+Must match `tracker.yaml` `depends_on`. Depth is team-set for version cuts; it does not reorder Level.
 ## 6. Coverage
 | Feature / FR / flow / EC / existing behavior | Stories · AC IDs | Gap? |
 ## 7. Handoff
@@ -241,9 +242,10 @@ Must match `tracker.yaml` `depends_on`.
 - Every story is in AAU form, free of implementation detail, with acceptance criteria, a source, and a product handshake.
 - Dependencies have no cycles, and the dependency order contains no dates, durations, or sprints.
 - Stories are written and listed Level 0 → N; section 5 matches `tracker.yaml` `depends_on`.
+- Depth tags (foundation / trunk / branch / leaf) are set when the team uses harvest rings; they do not contradict Depends on.
 - Brownfield: section 2b Delta is filled; every "must not change" PRD item has an "unchanged" AC listed there; greenfield: omit 2b when nothing Live is touched.
 - No FR/BR/UX prose restated in stories (IDs only).
 - Every story ends with its empty design-refs block. In update mode, existing design-refs blocks are kept exactly as they are, because design steps own them; a story whose screens change is noted in the change log so G02 refreshes its references.
 
 ## Tracker
-In `tracker.yaml`: add one item per story (type `story`, parent the feature, `initiative`, `scope`, title, status `in_definition`, or `backlog` with the reason in the title or a note, `depends_on`, source this file). Record answers to queries about this scope that this run resolves. On approval, move the stories that meet the definition to `ready_for_dev`, or to `in_design` when the product has a design stage and the scope has screens. Run `lint --fix`; lint refuses `ready_for_dev` on a file that isn't approved. Next: with a design stage, design-02-screen-mockups for this scope (after design-01-sitemap-flows for the initiative); otherwise dev-01-tech-design for I-<nnn> (or dev-02-data-model if the initiative's tech design already covers this scope). Product continues with product-03-ux-flows or product-04-user-stories for the next scope.
+In `tracker.yaml`: add one item per story (type `story`, parent the feature, `initiative`, `scope`, title, status `in_definition`, or `backlog` with the reason in the title or a note, `depends_on`, `depth` when the team set it, source this file). Record answers to queries about this scope that this run resolves. On approval, move the stories that meet the definition to `ready_for_dev`, or to `in_design` when the product has a design stage and the scope has screens. Run `lint --fix`; lint refuses `ready_for_dev` on a file that isn't approved. Next: with a design stage, design-02-screen-mockups for this scope (after design-01-sitemap-flows for the initiative); otherwise dev-01-tech-design for I-<nnn> (or dev-02-data-model if the initiative's tech design already covers this scope). Product continues with product-03-ux-flows or product-04-user-stories for the next scope. Version assignment (`fix_version`) is P06 — prefer trunk (+ deps) before branch/leaf of the same feature.

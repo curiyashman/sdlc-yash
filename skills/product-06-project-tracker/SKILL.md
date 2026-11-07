@@ -114,11 +114,11 @@ Facts about the product, its users, data, rules, scale, or environment are never
 ## Questionnaire (per operation; skip what the data answers)
 
 **Check a version or sprint the team planned**
-1. Which version or sprint, its goal, and which items the team put in it. Dates and length are the team's, if any.
-2. Anything to check beyond dependencies, for example capacity against the team's own estimates?
+1. Which version or sprint, its goal, and which items the team put in it. Dates and length are the team's, if any. Prefer a goal that names the harvest ring (e.g. "I-008 account privacy trunk").
+2. Anything to check beyond dependencies — depth rings (trunk before branch/leaf), capacity against the team's own estimates?
 
 **Update tracking data**
-3. Which items, and to what status, fix version, priority, or estimate? Or should I read the development files and update from them?
+3. Which items, and to what status, fix version, depth, priority, or estimate? Or should I read the development files and update from them?
 
 **Queries**
 4. Which query, and what is the answer: the product file and version, or the change request it becomes?
@@ -132,7 +132,7 @@ Facts about the product, its users, data, rules, scale, or environment are never
 ## Operations
 Each operation edits `tracker.yaml`, then runs `lint --fix` and `board`.
 - **Update tracking data:** change the fields asked for. A status follows the role workflow in the conventions [Statuses]. An unusual move (for example backlog straight to done) needs a reason, recorded as a DEC if the team wants it kept.
-- **Check a version or sprint:** for the items the team chose, check that every dependency is in the same set or already done (`lint` computes the levels). List what is missing, then set `fix_version` as the team decided. Capacity is checked only against the team's own estimates, and only if asked.
+- **Check a version or sprint:** for the items the team chose, check that every dependency is in the same set or already done (`lint` computes the levels). List what is missing, then set `fix_version` as the team decided. **Depth check (when stories have `depth`):** warn if the version includes a `branch`/`leaf` story whose same-feature `trunk` (or a direct Depends-on story) is not in this version and not already `done`/`released` — prefer a complete trunk harvest before deeper rings (conventions [Tree, depth, and versions]). Capacity is checked only against the team's own estimates, and only if asked.
 - **Queries:** record answers (`status: answered`, `answer: file@version`, or `became_cr` with the CR ID), and return the stories a blocking query held back to their previous status.
 - **Change requests:** keep the `change_requests` entries in step with product-05 (draft, approved, applied, rejected).
 - **Health check:** run `lint` and explain its findings in plain words. Then add what lint can't see:
