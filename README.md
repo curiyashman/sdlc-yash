@@ -146,15 +146,27 @@ Security skills use an isolated core (`source/core-security.md`): findings come 
 - **`qa-techniques.md`**, **`deploy-platforms.md`**, **`deploy-methods.md`**, **`observability-sre.md`**, **`security-methodology.md`**, **`security-jurisdictions.md`:** team-specific packs.
 - **`design-system-references.md`**, **`responsive-platforms.md`:** Design / G04 and responsive QA.
 
+## New product (greenfield) — recommended cadence
+
+Install skills once (below). In the **product** repo create `docs/pdlc/` and run `/pdlc-next` or `product-00`.
+
+1. **P00** — `product_mode: greenfield`, version scheme, depth rings on (foundation → trunk → branch → leaf).
+2. **Foundations** — `dev-00` / `dev-01` baseline; Design G00 + G04 Phase 0 if UI; M00 enablers as needed.
+3. **First initiative** — full PRD tree (P01–P02); stories Level 0→N with `depth` tags (P04).
+4. **Ship thin** — P06 puts only **foundation** then **trunk** (+ deps) into `fix_version`; leave branch/leaf for later versions. Build still follows dependency order inside that set.
+5. **Later versions** — add branch/leaf or the next module’s trunk the same way.
+
+Big requirement tree, fast cycles: **deps order the work; versions cut the harvest.**
+
 ## Typical flow
 1. **Setup:** Product runs `product-00` once (`product_mode`). Optional: Design (`design-00`, then G04 Phase 0 when needed), QA (`qa-00`), Deployment (`deploy-00`), Security (engagement via `sec-00`). Development runs `dev-00` (record dependency-audit command) and the `dev-01` baseline once.
-2. **Per idea:** `product-01`, then `product-02` for the initiative's PRD.
+2. **Per idea:** `product-01`, then `product-02` for the initiative's PRD (full scope; no silent MVP cut).
 3. **Per scope**, lowest dependency level first:
-   - Product: `product-03`, then `product-04` (Level 0→N; brownfield Delta).
+   - Product: `product-03`, then `product-04` (Level 0→N; `depth` tags; brownfield Delta when Live is touched).
    - Design (if on): foundation gate clear → `design-01` → `design-02` → `design-03`.
    - Development: `dev-01` → `dev-02` → `dev-05` (test design) → `dev-03` → `dev-04` (Frame checklist, audit, design parity) → `dev-05` (developer results).
    - QA (if on): `qa-01` after stories approved (incl. design parity smoke TCs); `qa-02` when stories are `in_qa`.
-4. **Release:**
+4. **Release (P06 chooses the set):** prefer complete trunk (+ deps) before branch/leaf of the same feature.
    - Stages off: `dev-06` → `dev-05` version Go → `dev-06` promote → `product-07`.
    - Stages on: `deploy-03` stage → `qa-03` Go (+ `sec-05` if Security on) → `deploy-03` promote → `product-07`.
 5. **Any time:** `pdlc-next`, `product-05`, `dev-07` (including UPG- from audits), incidents via `deploy-05` or `dev-06`.
