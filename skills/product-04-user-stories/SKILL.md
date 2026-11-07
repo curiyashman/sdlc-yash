@@ -155,7 +155,8 @@ IDs are `M01.S01.F01-EC01`, allocated with `pdlc.py new-id ec <feature>`. An edg
 - Acceptance criteria are in user-observable terms, in Given/When/Then form, and come after the edge-case analysis. A story without them is not ready.
 - Each acceptance criterion names the requirement or rule it verifies (`verifies M01.S01.F01-FR02`). A criterion that verifies nothing in the PRD means a requirement is missing: raise it (product-02 in update mode) rather than invent behavior here. Every FR and BR of the feature is verified by at least one criterion.
 - Story IDs come from `pdlc.py new-id story <feature>`, acceptance criteria from `new-id ac <story>`. Inside its story an AC may be written `AC01`; anywhere else it is cited as `<story>-AC01`.
-- Cite, don't copy: business rules, requirements, and screens are cited by ID with a short title, never restated. The PRD and UX file own their wording.
+- **Cite, don't copy:** cite FR/BR/SC/FL/EC IDs (short title optional); never restate PRD or UX wording. Readers open the owner file.
+- Keep the file thin: tables and ID lists only; no narrative that repeats the PRD.
 - If a feature uses an AI model, add its eval cases (`<feature>-EV01`, from `new-id ev <feature>`) under the feature: input, expected result or judging rule, group, and the threshold the team set (`references/ai-features.md`).
 - No dates, durations, or sprint assignments. Order is the dependency level only.
 
@@ -167,71 +168,67 @@ As a [role], I want [capability], so that [outcome].
 
 | Field | Content |
 |---|---|
-| Feature / FRs | M01.S01.F01; M01.S01.F01-FR01, M01.S01.F01-FR02 |
-| Flows / screens | M01.S01-FL01; M01.S01-SC01, M01.S01-SC02 |
-| Edge cases | M01.S01.F01-EC01, EC02, EC04 |
-| Depends on | story IDs, existing features, other scopes' or initiatives' stories |
+| Feature / FRs | M01.S01.F01; FR01, FR02 |
+| Flows / screens | FL01; SC01, SC02 |
+| Edge cases | EC01, EC02, EC04 |
+| Depends on | story / released feature IDs |
 
-Status, dependency level, priority, and estimate are tracking fields: they live in `tracker.yaml` only (the board shows them), so they are not repeated here.
+Status / dep_level / priority / estimate → `tracker.yaml` only.
 
-Acceptance criteria
-- AC01 (verifies M01.S01.F01-FR01): Given [context], when [action], then [result the user sees].
-- AC02 (EC01, verifies M01.S01.F01-BR01): Given [edge case], when [action], then [the defined behavior].
-- AC03 (EC02): Given [error condition], when [action], then [the error behavior the user sees].
-- AC04: Empty / loading: [what the user sees].
-- AC05 (unchanged): Given [existing situation], when [existing action], then [today's behavior, still the same].
+Acceptance criteria (Given/When/Then; cite verifies FR/BR/EC; no PRD restatement)
+- AC01 (verifies FR01): …
+- AC02 (EC01, verifies BR01): …
+- AC03 (unchanged): …   # brownfield / must-not-change
 
-Business rules: [BR IDs from the PRD, cited with a short title, never restated]
-Open: [question numbers]
+BR IDs: … | Open: …
 
-Product handshake
-| Involves | What | Source |
+Product handshake (IDs + source@version only)
+| Involves | What (IDs) | Source |
 |---|---|---|
-| Screens | M01.S01-SC01 (form, new), M01.S01-SC02 (list, changed) | 03-ux/M01.S01-invoices.md@1.0.0 |
-| Information | invoice due date (captured), invoice status (shown) | 02-prd.md@1.1.0, section 5 |
-| Rules and permissions | M01.S01.F01-BR01 owner only sends; M01.S01.F01-BR02 Pro plan and above | 02-prd.md@1.1.0, section 5 |
-| Existing behavior | M01.S01.F02 invoice list: sorting unchanged | 02-prd.md@1.1.0, section 6 |
-| Touchpoints | M02.S01.F01 payments: marks invoice paid (blocking) | 02-prd.md@1.1.0, section 8 |
-| Non-functional | I-003-NFR01, I-003-NFR03 | 02-prd.md@1.1.0, section 7 |
-| Consumed by | development: tech design, data model, tasks, QA | |
+| Screens | SC01 (new), SC02 (changed) | 03-ux/…@x |
+| Information | … | 02-prd.md@x §5 |
+| Rules | BR01, BR02 | 02-prd.md@x §5 |
+| Existing behavior | … (unchanged) | 02-prd.md@x §6 |
+| Touchpoints | … | 02-prd.md@x §8 |
+| Non-functional | NFR01 | 02-prd.md@x §7 |
 
-Design references (written by design steps; leave empty when writing a story)
 <!-- design-refs:start -->
 <!-- design-refs:end -->
 ```
 
-Example values in the template show the format only; they are not defaults.
+Example values show format only.
 
 ## Ready for dev
 A story is **ready for dev** when every edge case it lists has a defined behavior covered by an acceptance criterion (or the person has accepted it as Open and non-blocking), its acceptance criteria are complete, no blocking question is Open, its dependencies are known, its handshake is complete, every screen it cites is in an approved UX file (or UX is n/a for the scope), and this file is approved by the approver recorded in `product/00-product-context.md`. Without a design stage, that approval is the handoff. With a design stage (`design/00-design-setup.md` approved) and a scope that has screens, approval moves the stories that meet the above to the in-design role, and they become ready for dev when design-03-design-handoff approves the scope's design; scopes with no screens go straight to ready for dev. Until approval, a story that meets everything else stays in the in-definition role; a story that doesn't stays in the backlog role, with the reason.
 
 ## Output: `product/I-<nnn>-<slug>/04-stories/<scope>-<slug>.md`
 
+Keep sections to the tables below. Omit empty optional rows; cite IDs, don't paste PRD text.
+
 ```markdown
 (header: pdlc_step "P04", initiative I-<nnn>, scope <ID>, depends_on [product/I-<nnn>-<slug>/02-prd.md@x, product/I-<nnn>-<slug>/03-ux/<scope>-<slug>.md@x])
 # Stories and handoff: I-[nnn] [scope ID] [name]
 ## 1. Overview
-Scope, features covered (all of them, or the ones the person put out of scope with reasons), sources used, counts (computed, not hand-counted).
+| Scope | Features in / out | Sources | Story count |
 ## 2. Gaps and open questions
+| # | Gap | Blocks? |
+## 2b. Delta (brownfield; skip if greenfield / nothing Live touched)
+| Changes (new / changed behavior) | Unchanged (cite AC IDs marked unchanged) | PRD §6 / Live refs |
+What this scope adds or changes vs what must stay the same. Unchanged column lists AC IDs only.
 ## 3. Edge-case registers
 ### Feature M01.S01.F01 [name]
-(register table above)
+(register table — IDs and short case labels; behavior cites BR/FR or Open #)
 ## 4. Stories by feature
-### Feature M01.S01.F01 [name]
-(stories in the template above — within each feature, and across the file, order stories by dependency level ascending)
+(stories in the template — Level 0 → N across the file)
 ## 5. Dependency order
-| Dep level (from `pdlc.py lint`) | Stories | Depends on |
-Level 0 depends on nothing still to be built (or only on released / existing features); each later level depends only on lower levels. No dates or durations. This table must agree with each story's `depends_on` in `tracker.yaml`.
-## 6. Touchpoints
-## 7. Coverage
-| Feature / FR / flow / edge case / existing behavior | Stories and AC IDs | Gap? |
-## 8. Handoff to development
-- Package: this file, `02-prd.md`, and `03-ux/<scope>-<slug>.md`, at the versions in the header. With a design stage, also the scope's `design/.../03-handoff/<scope>-<slug>.md` and its Figma frames, once G03 approves them.
-- Ready for dev: story IDs by dependency level.
-- Not ready: stories held back, each with its blocking reason.
-- Open but not blocking: questions development may proceed without; development assumes nothing about them and waits for the answer before building the part they affect.
-- Questions from development: the queries in `tracker.yaml`, answered by [product contact]. Requirement changes only through product-05-change-request.
-- Handoff status: Handed off (approver, date), In design (approved by product, waiting for G03), or Not yet handed off.
+| Dep level | Stories | Depends on |
+Must match `tracker.yaml` `depends_on`.
+## 6. Coverage
+| Feature / FR / flow / EC / existing behavior | Stories · AC IDs | Gap? |
+## 7. Handoff
+- Package: this file, `02-prd.md`, `03-ux/…` @ header versions (+ G03 frames when design stage on).
+- Ready / not ready / open non-blocking: story IDs + reasons.
+- Handoff status: Handed off | In design | Not yet (approver, date).
 ## Change log
 ```
 
@@ -244,7 +241,8 @@ Level 0 depends on nothing still to be built (or only on released / existing fea
 - Every story is in AAU form, free of implementation detail, with acceptance criteria, a source, and a product handshake.
 - Dependencies have no cycles, and the dependency order contains no dates, durations, or sprints.
 - Stories are written and listed Level 0 → N; section 5 matches `tracker.yaml` `depends_on`.
-- Brownfield: every "must not change" PRD item for this scope has an "unchanged" AC; greenfield: that set may be empty when nothing exists yet.
+- Brownfield: section 2b Delta is filled; every "must not change" PRD item has an "unchanged" AC listed there; greenfield: omit 2b when nothing Live is touched.
+- No FR/BR/UX prose restated in stories (IDs only).
 - Every story ends with its empty design-refs block. In update mode, existing design-refs blocks are kept exactly as they are, because design steps own them; a story whose screens change is noted in the change log so G02 refreshes its references.
 
 ## Tracker

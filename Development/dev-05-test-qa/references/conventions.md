@@ -305,6 +305,7 @@ IDs are never renumbered or reused; a removed item keeps its ID with the status 
 
 **Reference by ID, don't copy.**
 - A later file cites an ID with a short title (`M01.S02.F01-BR01 drafts only`). It never restates the requirement, rule, criterion, or decision.
+- Prefer thin chain files: required tables and ID lists. Brownfield story files include a **Delta** (what changes vs unchanged AC IDs) instead of rewriting Live behavior.
 - Coding agents and testers read the owner file for the wording.
 - `pdlc.py lint` checks that every cited FR, BR, NFR, US, EC, AC, SC, FL, TC, Q, CR, BUG, DEC, and maintenance ID exists in its owner file or the tracker.
 - The pinned `depends_on` versions show whether that owner file has moved on since.

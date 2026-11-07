@@ -123,43 +123,40 @@ Ask only what remains: conflicts between the docs and the code, a branch name if
 
 ## Phase D: Plan (`dev/I-<nnn>-<slug>/04-build/<story-or-bug-id>-plan.md`)
 
+Required tables only. Cite task / AC / TC / frame IDs; don't paste story or PRD text. Omit empty optional sections (mark `n/a`).
+
 ```markdown
-(header: pdlc_step "D04", initiative I-<nnn>, scope <story or bug ID>, depends_on [dev/architecture.md@x, dev/I-<nnn>-<slug>/01-tech-design.md@x, dev/I-<nnn>-<slug>/02-data-model/<scope>-<slug>.md@x, dev/I-<nnn>-<slug>/03-tasks/<scope>-<slug>.md@x, product/I-<nnn>-<slug>/04-stories/<scope>-<slug>.md@x])
+(header: pdlc_step "D04", initiative I-<nnn>, scope <story or bug ID>, depends_on [dev/architecture.md@x, …/01-tech-design.md@x, …/02-data-model/…@x, …/03-tasks/…@x, product/…/04-stories/…@x])
 # Build plan: [story or bug ID] [title]
 
 ## 1. Summary
-What will exist when this is done, in a few lines.
+One short paragraph: what exists when done.
 ## 2. Inputs read
 | File | Version |
-## 3. Codebase findings (Observed)
-Relevant structure, the example file for each pattern touched, where each touchpoint lives (paths).
-**Read map:** | Goal (question) | Files and line ranges read | What was learned |
-**Reuse map:** | Task | Needed | Found (Observed path) or "none found" | Decision (reuse / extend / new) | Reason |
-## 4. Conflicts and gaps
-| # | Docs say | Code shows | Proposed resolution | Product query or technical? |
+## 3. Read map · Reuse map
+| Goal | Files:lines | Learned |
+| Task | Needed | Found path or none | reuse / extend / new | Why |
+## 4. Conflicts
+| # | Docs | Code | Resolution | product query / technical |
 ## 5. Packages
-| Package | Version to pin | Install-list item | Task |
-Nothing outside the install list unless approved in this plan.
-## 6. Change list and budget
-| Path | Create / modify / delete | What changes | Task / sub-task IDs |
-Budget per task, from D03 and refined here: files touched and estimated lines added and removed. Code that becomes dead is listed for deletion.
-## 7. Data and config
-Migrations (with down steps), existing-data handling, seed data, env var names per environment (never values), feature flags.
-## 8. Tests
-The approved tests from the scope's test design (D05) are the definition of done and are **locked**: list their TC IDs and files. New tests are added only for TC IDs in the test design (ask D05 to add a case if one is missing); no test without a TC ID.
-| TC ID | Covers (AC / EC / TH) | Level | File | Locked or new |
+| Package | Pin | Install-list item | Task |   # none outside install list
+## 6. Change list · budget
+| Path | create / modify / delete | What | Task IDs | Budget (files / ±lines) |
+## 7. Data · config
+Migrations (with down), seeds, env **names** (never values), flags — or `n/a`.
+## 8. Tests (locked from D05)
+| TC ID | Covers (AC / EC / TH) | Level | File | locked / new |
 ## 9. Frame checklist
-Required when `config.design_stage: true` and the story has visible UI (skip with `n/a — no visible change` when design-refs say so). One row per screen state the story builds:
-| Screen · state | Frame link (from design-refs) | Library component(s) | Task / sub-task | Built? |
-Copy cites from the story's design-refs and G03 handoff; do not invent frames. D04 builds only what this table lists.
+`n/a` if no design stage or no visible change. Else one row per screen state from design-refs:
+| Screen · state | Frame link | Library component(s) | Task | Built? |
 ## 10. Order of work
-Sub-tasks in dependency order, with commit points. No time estimates. Prefer a vertical slice: enough layers for one user outcome before polishing adjacent work.
-## 11. Risks and rollback
-## 12. Out of scope
-## 13. Implementation log
-Filled during the build: deviations and why, decisions, test results, commits, and the **footprint**: lines added and removed per task against its budget, new files, new dependencies, reuse decisions taken, code deleted. Budget overruns past the team's threshold carry a reason.
-## 14. Design parity
-Filled in Phase F when design stage is on and the story has UI: short note comparing the build to the Frame checklist (Figma/screenshot vs running UI — layout, states, key components). Record match, gaps, or "deferred with query". Required before moving the story to `in_qa`.
+Sub-task IDs in dependency order + commit points. Vertical slice first.
+## 11. Risks · rollback · out of scope
+Short bullets, or `n/a`.
+## 12. Implementation log
+Filled in build: deviations, tests, commits, footprint vs budget.
+## 13. Design parity
+Filled in Phase F when UI + design stage: Figma/screenshot vs build per Frame checklist row. Required before `in_qa`.
 ## Change log
 ```
 
@@ -176,7 +173,7 @@ Filled in Phase F when design stage is on and the story has UI: short note compa
 1. Fill the implementation log: what was done, test results, commits, remaining sub-tasks if any.
 2. Record pinned package versions in the plan; with the person's OK, add them to the install list in `dev/architecture.md` (PATCH bump).
 3. **Review against the requirements.** Before review by people, check the diff against every AC, EC, and threat mitigation the tasks implement, against the plan (including the Frame checklist), and against the lean-code rules. Compare the footprint with the budget, and check for new helpers that duplicate existing ones and tests without a TC ID. Where a separate agent (sub-agent) is available, give it the diff, the cited IDs, and the owner files, but not your reasoning, and record its findings in the implementation log. Fix what is in scope; anything else becomes a query or a new item.
-4. **Design parity** (when `design_stage` is on and the story has UI): fill plan section 14 — compare the running UI (or screenshots) to each Frame checklist row. Note matches and gaps; open a query for product/design mismatches you must not invent around. Do not move the story to `in_qa` until this note is filled (or `n/a — no visible change`).
+4. **Design parity** (when `design_stage` is on and the story has UI): fill plan section 13 — compare the running UI (or screenshots) to each Frame checklist row. Note matches and gaps; open a query for product/design mismatches you must not invent around. Do not move the story to `in_qa` until this note is filled (or `n/a — no visible change`).
 5. Merge per the convention in `dev/00-dev-setup.md`: open a pull request, or merge after the person's explicit OK. Never merge without one of the two. The pull request description gives reviewers what the risk tiers need: the TC IDs passing, the footprint against the budget, the reuse decisions, design parity summary when applicable, any change to locked tests (there should be none), and a list of the changes in line-by-line review areas (auth, money, personal data, deletion, migrations, secrets, and any tier the team added).
 6. Update status: finished tasks and sub-tasks to `done` in the `pdlc-tasks` block; the story, bug, or maintenance item to `in_review` in `tracker.yaml` while its pull request is open, and to `in_qa` once merged (only after design parity when it applies). Run `lint --fix` and `board`.
 7. Reply in one or two sentences: what was built, test results, design parity, anything left Open or waiting on a query. Next: dev-05-test-qa for this scope, or dev-04-code-plan-build for the next ready story.

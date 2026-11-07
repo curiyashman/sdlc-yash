@@ -128,6 +128,8 @@ Facts about the product, its users, data, rules, scale, or environment are never
 
 ## Output: `design/I-<nnn>-<slug>/03-handoff/<scope>-<slug>.md`
 
+Cite frame links and component names; don't restate UX copy or story AC text. Omit empty sections.
+
 ```markdown
 (header: pdlc_step "G03", initiative I-<nnn>, scope <ID>, depends_on [design/I-<nnn>-<slug>/02-mockups/<scope>-<slug>.md@x, product/I-<nnn>-<slug>/04-stories/<scope>-<slug>.md@x, product/I-<nnn>-<slug>/03-ux/<scope>-<slug>.md@x])
 # Design handoff: I-[nnn] [scope ID] [name]
@@ -135,26 +137,23 @@ Facts about the product, its users, data, rules, scale, or environment are never
 > Verified in Figma: [yes / no (level)].
 
 ## 1. Story to frame map
-| Story ID | Screens | Frames (links) | Edge cases and ACs shown | No visible change? |
-## 2. Frames for development
-Reading order by flow; for each screen: link, states, breakpoints, the components and variables used.
-## 3. Implementation notes (design terms)
-Interactions, transitions, responsive behavior, empty and loading behavior as shown or provided. Anything not provided: Open, never inferred.
-## 4. Assets
-| Asset | Used in | Format | Exported by | Link |
-## 5. Review findings
-| # | Finding | Frame | Source | Blocking? | Resolution (G02 update / query / accepted by) |
-## 6. Coverage
-| UX screen / state / edge case / AC | Frame | Gap? |
-## 7. Handoff to development
-- Package: this file, the mockups file, and the files listed in the stories file's handoff section.
-- Ready for dev: story IDs by dependency level.
-- Not ready: stories held back, each with its blocking reason.
-- Questions from development about a frame: the queries in `tracker.yaml`, answered by [design contact]; content or behavior questions go to Product.
-- Handoff status: Handed off (approver, date), or Not yet handed off.
-## 8. Reference audit
-| Product file | Version after write | Stories checked | Missing or stale found | Fixed? |
-## 9. Touchpoints
+| Story ID | Screen · state | Frame link | Library components / variables | EC · AC shown | No visible change? |
+Reading order = table order (by flow). One row per screen state.
+## 2. Notes (design terms only; Open if not in frames)
+| Topic | Note or Open # |
+Interactions / transitions / responsive / empty / loading — only what frames don't already show.
+## 3. Assets
+| Asset | Used in (SC) | Format | Exported by | Link |
+## 4. Findings
+| # | Finding | Frame | Source ID | Blocking? | Resolution |
+## 5. Coverage
+| UX screen / state / EC / AC | Frame | Gap? |
+## 6. Handoff
+- Package: this file + mockups + stories handoff package.
+- Ready / not ready (story IDs); status Handed off | Not yet (approver, date).
+- Frame questions → Design; behavior → Product (`tracker.yaml` queries).
+## 7. Reference audit
+| Product file | Version | Stories | Missing/stale | Fixed? |
 ## Change log
 ```
 

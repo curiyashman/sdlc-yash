@@ -177,7 +177,7 @@ python3 tools/install.py --plugin-local   # also symlink into ~/.cursor/plugins/
 - **Claude / Cursor agent instructions** (paste into the product's `CLAUDE.md` / `AGENTS.md`, not into the skills package): [`Product/claude-project-instructions.md`](Product/claude-project-instructions.md), [`Design/agent-instructions.md`](Design/agent-instructions.md), [`Development/agent-instructions.md`](Development/agent-instructions.md), [`QA/agent-instructions.md`](QA/agent-instructions.md), [`Deployment/agent-instructions.md`](Deployment/agent-instructions.md), [`Security/agent-instructions.md`](Security/agent-instructions.md). Or let `dev-00-dev-setup` add the Development pointer, lint script, and CI.
 
 ## Editing the skills
-Never edit the generated folders (`Common/`, `Product/`, `Design/`, `Development/`, `QA/`, `Deployment/`, `Security/`, `skills/`). Edit `source/` and rebuild:
+Never edit the generated folders (`Common/`, `Product/`, `Design/`, `Development/`, `QA/`, `Deployment/`, `Security/`, `skills/`). Edit `source/` and rebuild. Commit **`skills/`** for the plugin layout; team folders (`Product/`, …) are browse/compat mirrors of the same build — installers use `skills/` or team folders interchangeably:
 
 | File | Holds |
 |---|---|
