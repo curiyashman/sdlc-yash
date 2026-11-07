@@ -86,7 +86,7 @@ Applicable regimes: | Regime | Applies because | Source and date read | Legal co
 
 ## 8. Tracker conventions
 | Convention | Value | Label |
-Status names mapped to roles (also in `tracker.yaml` config), estimates, rhythm, version scheme, external tool and mapping, design stage on or off.
+Status names mapped to roles (also in `tracker.yaml` config), estimates, rhythm, version scheme, **depth rings + fix_version cadence** (foundation / trunk / branch / leaf), external tool and mapping, design stage on or off.
 
 ## 9. Design system
 Location, or "none yet".
