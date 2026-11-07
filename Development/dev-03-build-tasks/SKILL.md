@@ -125,7 +125,7 @@ Use only the layers a story touches, guided by its product handshake and the tec
 | API | Each capability's contract: inputs, outputs, errors, auth, pagination, following the API conventions in the architecture |
 | Backend | Business rules, state transitions, background jobs, integrations, notifications, audit |
 | Frontend | Data fetching, client state, form handling, client validation matching server rules, role-based visibility, loading and error handling |
-| UI | Screens and components from the UX file and, with a design stage, the Figma frames named in the design handoff (each task cites the frame and state, taken from the story's design references), with every state, responsive behavior, accessibility |
+| UI | Screens and components from the UX file and, with a design stage (`config.design_stage: true`), the Figma frames in the story's design-refs: **every UI task must cite screen ID + state + frame link** (and the library component when the handoff names one). No UI task without those cites when design stage is on. Stories with `no visible change` get no UI tasks (record that in Coverage). |
 | Auth / Security | Permission checks, tenant isolation, input sanitization, secrets, per L4 and L8 |
 | Caching / Rate limiting | What to cache or limit and the rules, per L9 and L10 |
 | Logging | Errors, events, and metrics to record, per L12 |
@@ -133,6 +133,8 @@ Use only the layers a story touches, guided by its product handshake and the tec
 | QA | Automated tests from the acceptance criteria and edge cases, including "unchanged" criteria that protect existing behavior; for features with an AI model, the eval harness and eval set from `references/ai-features.md` |
 
 Foundations several stories share (base schema, auth middleware, shared layout) are tasks under the M00 enabler stories, referenced by later tasks, never repeated.
+
+**Vertical slice.** For each story, the task set covers the user outcome end-to-end across the layers it needs (data → API/backend → frontend/UI, plus cross-cutting where required), or Coverage records an explicit **no UI** / backend-only reason from the product handshake. Do not hand off a story that only has orphan API or UI tasks with no path to the accepted outcome.
 
 ## Task template
 Tasks are data. Write each story's tasks as one fenced block whose info string is `yaml pdlc-tasks`. `pdlc.py` reads these blocks for dependencies, levels, counts, and the board; D04 updates their status in place. A task's text fields are written once, here; nothing else restates them.
@@ -147,6 +149,8 @@ Tasks are data. Write each story's tasks as one fenced block whose info string i
   build: When the owner confirms a bulk send, the send endpoint shall queue one job per selected invoice.   # one EARS sentence, no code
   use: [L2, L3, DEC-004, "architecture.md section 4"]          # decisions, conventions, install-list packages
   touchpoints: [M01.S01-SC01, "entity Invoice", "src/api/invoices (Observed)"]
+  # UI layer (design_stage on): touchpoints must include screen · state · frame URL from the story's design-refs, e.g.
+  # touchpoints: ["M01.S02-SC01 · result", "https://www.figma.com/design/…?node-id=1-3", "Button/Primary (library)"]
   implements: [M01.S01.F01-US01-AC01, M01.S01.F01-EC02, M01.S01.F01-FR01]
   tests: [M01.S01.F01-US01-TC01, M01.S01.F01-US01-TC02]   # approved test cases from D05; done when they pass
   budget: {files: 3, lines: "+120 / -40"}                # estimate; overruns past the team's threshold need a reason
@@ -192,7 +196,7 @@ The gate for D04 (conventions [Specification review and tests first]). The revie
 | Acceptance criteria and edge cases | handed off unchanged; every FR and BR verified by a criterion | | | |
 | Constraints | NFRs, threat mitigations (TH), compliance obligations, review tiers | | | |
 | Test design | every AC, EC, TH, and EV covered by an approved test case; tests reviewed, not just named | | | |
-| Tasks | every task cites its tests; budgets present; reuse expected where the repo map shows existing code | | | |
+| Tasks | every task cites its tests; budgets present; reuse expected where the repo map shows existing code; UI tasks (when design stage on) cite frame + state from design-refs; each story is a vertical slice or has an explicit no-UI reason | | | |
 Sign-off: [reviewer, date]. The file is approved only when this table is complete with no blocking finding. After sign-off, the approved tests are locked for the coding agent.
 ## Change log
 ```
@@ -201,6 +205,8 @@ Sign-off: [reviewer, date]. The file is approved only when this table is complet
 - Every acceptance criterion and every edge case (EC ID) of every story in scope is covered by at least one task, including "unchanged" criteria.
 - Every layer the tech design marks Change or New for these stories has tasks; every task has a layer and a cited source.
 - Every screen state (loading, empty, error) and every flow error path has a task.
+- With `design_stage` on: every UI task's `touchpoints` cite screen ID, state, and frame link from that story's design-refs (library component when the handoff names one); stories marked `no visible change` have no UI tasks and say so in Coverage.
+- Each story is a vertical slice to the user outcome, or Coverage records an explicit no-UI / backend-only reason.
 - Every entity and migration from D02 used by these stories has a database task.
 - No task decides product behavior; no task names a package outside the install list; no task contains code.
 - Dependencies have no cycles (`lint` checks); foundations come first.

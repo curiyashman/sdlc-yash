@@ -23,9 +23,9 @@ You are a senior engineer working inside one of the product's code repositories 
 4. For a maintenance item (HF, TD, UPG, SPK, CHR), the plan is `dev/maintenance/<id>-plan.md` and its D07 file is the source. It must not change product behavior; if it would, stop and raise a query. A hotfix may follow the shortened path its D07 file records, but its tests and documents are completed before it is closed.
 
 ## Phase B: Read
-1. Read the upstream files above for this story, noting each file's version.
+1. Read the upstream files above for this story, noting each file's version. With a design stage, open each frame link in the story's design-refs (Figma connector or screenshot) before planning UI work.
 2. Survey the codebase read-only, **by goal** (conventions [Goal-directed reading]). For each task, write the questions first ("Where is invoice sending triggered?", "Is there an existing job queue helper?"). Locate the answers with the repo map, search, symbols, and references, then read only the functions or line ranges that answer them. Cover where each touchpoint lives, existing code to reuse, the example file for each pattern you'll touch, installed packages against the install list, test setup, env config, and the migration tool. Run nothing that changes state.
-3. **Reuse search.** For everything a task would create (module, function, component, helper, type, config), search for an existing one first and record the result in the reuse map.
+3. **Reuse search.** For everything a task would create (module, function, component, helper, type, config), search for an existing one first and record the result in the reuse map. Prefer design-system / library components named in the handoff over new one-offs.
 
 ## Phase C: Questions
 Ask only what remains: conflicts between the docs and the code, a branch name if the convention leaves it open, local setup access (database, env vars), anything that blocks a task.
@@ -59,16 +59,22 @@ Migrations (with down steps), existing-data handling, seed data, env var names p
 ## 8. Tests
 The approved tests from the scope's test design (D05) are the definition of done and are **locked**: list their TC IDs and files. New tests are added only for TC IDs in the test design (ask D05 to add a case if one is missing); no test without a TC ID.
 | TC ID | Covers (AC / EC / TH) | Level | File | Locked or new |
-## 9. Order of work
-Sub-tasks in dependency order, with commit points. No time estimates.
-## 10. Risks and rollback
-## 11. Out of scope
-## 12. Implementation log
+## 9. Frame checklist
+Required when `config.design_stage: true` and the story has visible UI (skip with `n/a — no visible change` when design-refs say so). One row per screen state the story builds:
+| Screen · state | Frame link (from design-refs) | Library component(s) | Task / sub-task | Built? |
+Copy cites from the story's design-refs and G03 handoff; do not invent frames. D04 builds only what this table lists.
+## 10. Order of work
+Sub-tasks in dependency order, with commit points. No time estimates. Prefer a vertical slice: enough layers for one user outcome before polishing adjacent work.
+## 11. Risks and rollback
+## 12. Out of scope
+## 13. Implementation log
 Filled during the build: deviations and why, decisions, test results, commits, and the **footprint**: lines added and removed per task against its budget, new files, new dependencies, reuse decisions taken, code deleted. Budget overruns past the team's threshold carry a reason.
+## 14. Design parity
+Filled in Phase F when design stage is on and the story has UI: short note comparing the build to the Frame checklist (Figma/screenshot vs running UI — layout, states, key components). Record match, gaps, or "deferred with query". Required before moving the story to `in_qa`.
 ## Change log
 ```
 
-**Gate.** Show the plan and ask for explicit approval. If the person asks for changes, update the plan and ask again. If the agent has a planning mode, use it for Phases B to D; the plan still goes into the file.
+**Gate.** Show the plan and ask for explicit approval. If the person asks for changes, update the plan and ask again. If the agent has a planning mode, use it for Phases B to D; the plan still goes into the file. When design stage is on, the Frame checklist must be complete before approval.
 
 ## Phase E: Build
 1. Create the branch per the convention in `dev/00-dev-setup.md`, and set the story, bug, or maintenance item to `in_progress` in `tracker.yaml` and its tasks to `in_progress` in the task file's `pdlc-tasks` block.
@@ -80,10 +86,11 @@ Filled during the build: deviations and why, decisions, test results, commits, a
 ## Phase F: Finish
 1. Fill the implementation log: what was done, test results, commits, remaining sub-tasks if any.
 2. Record pinned package versions in the plan; with the person's OK, add them to the install list in `dev/architecture.md` (PATCH bump).
-3. **Review against the requirements.** Before review by people, check the diff against every AC, EC, and threat mitigation the tasks implement, against the plan, and against the lean-code rules. Compare the footprint with the budget, and check for new helpers that duplicate existing ones and tests without a TC ID. Where a separate agent (sub-agent) is available, give it the diff, the cited IDs, and the owner files, but not your reasoning, and record its findings in the implementation log. Fix what is in scope; anything else becomes a query or a new item.
-4. Merge per the convention in `dev/00-dev-setup.md`: open a pull request, or merge after the person's explicit OK. Never merge without one of the two. The pull request description gives reviewers what the risk tiers need: the TC IDs passing, the footprint against the budget, the reuse decisions, any change to locked tests (there should be none), and a list of the changes in line-by-line review areas (auth, money, personal data, deletion, migrations, secrets, and any tier the team added).
-5. Update status: finished tasks and sub-tasks to `done` in the `pdlc-tasks` block; the story, bug, or maintenance item to `in_review` in `tracker.yaml` while its pull request is open, and to `in_qa` once merged. Run `lint --fix` and `board`.
-6. Reply in one or two sentences: what was built, test results, anything left Open or waiting on a query. Next: dev-05-test-qa for this scope, or dev-04-code-plan-build for the next ready story.
+3. **Review against the requirements.** Before review by people, check the diff against every AC, EC, and threat mitigation the tasks implement, against the plan (including the Frame checklist), and against the lean-code rules. Compare the footprint with the budget, and check for new helpers that duplicate existing ones and tests without a TC ID. Where a separate agent (sub-agent) is available, give it the diff, the cited IDs, and the owner files, but not your reasoning, and record its findings in the implementation log. Fix what is in scope; anything else becomes a query or a new item.
+4. **Design parity** (when `design_stage` is on and the story has UI): fill plan section 14 — compare the running UI (or screenshots) to each Frame checklist row. Note matches and gaps; open a query for product/design mismatches you must not invent around. Do not move the story to `in_qa` until this note is filled (or `n/a — no visible change`).
+5. Merge per the convention in `dev/00-dev-setup.md`: open a pull request, or merge after the person's explicit OK. Never merge without one of the two. The pull request description gives reviewers what the risk tiers need: the TC IDs passing, the footprint against the budget, the reuse decisions, design parity summary when applicable, any change to locked tests (there should be none), and a list of the changes in line-by-line review areas (auth, money, personal data, deletion, migrations, secrets, and any tier the team added).
+6. Update status: finished tasks and sub-tasks to `done` in the `pdlc-tasks` block; the story, bug, or maintenance item to `in_review` in `tracker.yaml` while its pull request is open, and to `in_qa` once merged (only after design parity when it applies). Run `lint --fix` and `board`.
+7. Reply in one or two sentences: what was built, test results, design parity, anything left Open or waiting on a query. Next: dev-05-test-qa for this scope, or dev-04-code-plan-build for the next ready story.
 
 ## Using this skill in Cursor
 The same SKILL.md works in Cursor, which loads skills from `.cursor/skills/`, `.agents/skills/`, and `.claude/skills/` (project or home folder) and can run them as `/dev-04-code-plan-build`. Where AskUserQuestion is not available, ask numbered plain-text questions; where SendUserFile is not available, write the plan into the product's docs location and give its path.
