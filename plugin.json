@@ -8,6 +8,7 @@
   },
   "homepage": "https://github.com/curiyashman/sdlc-yash",
   "repository": "https://github.com/curiyashman/sdlc-yash",
+  "logo": "assets/logo.svg",
   "keywords": [
     "pdlc",
     "product",
