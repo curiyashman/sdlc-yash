@@ -4,7 +4,8 @@ QA, Deployment, Security chain).
 
 Commands (run from anywhere; --root is the product's docs path, default docs/pdlc):
   lint     [--fix] [--strict]  validate headers, upstream versions, IDs, citations, dependencies,
-                               queries, handoff and design references. --fix writes dep levels.
+                               queries, handoff, upstream-ready story deps, and design references.
+                               --fix writes dep levels.
   board                        regenerate tracker.md from tracker.yaml and the file headers.
   next     [--team product|design|dev|qa|deploy|security]   the next steps and scopes, by dependency.
   new-id   KIND [PARENT]       the next free ID (initiative, module, sub-module, feature, story,
@@ -29,6 +30,9 @@ ROLES = ["backlog", "in_definition", "in_design", "ready_for_dev", "in_progress"
 DONE_ROLES = {"done", "released", "removed"}
 BUILT_ROLES = {"in_review", "in_qa", "done", "released"}
 HANDED_OFF_ROLES = {"ready_for_dev", "in_progress", "in_review", "in_qa", "done", "released"}
+# Stories in these statuses may only depend on handed-off stories or shipped map items.
+UPSTREAM_GATE_STATUSES = {"ready_for_dev", "in_progress", "in_review", "in_qa"}
+SHIPPED_ROLES = {"done", "released"}
 
 H2 = r"\d{2,}"
 H3 = r"\d{3,}"
@@ -755,6 +759,31 @@ def check_tracker_rules(docs, rep):
                 rep.err(src, f"{iid}: no design references, but the scope has screens and a design stage")
             elif re.search(r"\b(stale|not yet designed)\b", m.group(1)):
                 rep.err(src, f"{iid}: design references are stale or not yet designed")
+        # Upstream-ready: handed-off consumers need upstream stories handed off (or map items shipped).
+        # in_design / in_definition / backlog are not gated — same-scope design may proceed together.
+        if st in UPSTREAM_GATE_STATUSES:
+            deps = i.get("depends_on") or []
+            if isinstance(deps, str):
+                deps = [deps]
+            for dep in deps:
+                dep = str(dep)
+                up = idx.get(dep)
+                if not up:
+                    continue  # unknown dep already reported by dep_graph
+                up_st = up.get("status")
+                if up.get("type") == "story":
+                    if up_st not in HANDED_OFF_ROLES:
+                        rep.err(
+                            "tracker.yaml",
+                            f"{iid}: '{st}' but upstream story {dep} is '{up_st}' "
+                            f"(needs ready_for_dev or later)"
+                        )
+                elif up_st not in SHIPPED_ROLES:
+                    rep.err(
+                        "tracker.yaml",
+                        f"{iid}: '{st}' but upstream {dep} is '{up_st}' "
+                        f"(map/maintenance item must be done or released)"
+                    )
     # Design foundation gate: G02 / in_design must not proceed without Phase 0 when required.
     if design and docs.design_foundation_gate_required() and not docs.design_foundation_ready():
         mode = docs.design_system_mode() or "planned"

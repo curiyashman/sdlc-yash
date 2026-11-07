@@ -33,11 +33,12 @@ The **product handshake** under each story tells development what the story invo
 
 ## Process
 
+0. **Product mode.** Read `config.product_mode` (or the product card). **Brownfield:** every touched Live feature needs "unchanged" ACs for behavior that must not change; Depends on may cite existing map feature IDs that are `released`. **Greenfield:** Depends on are other planned stories or foundations only; fewer "unchanged" ACs.
 1. **Outcomes.** For each feature, list the distinct user outcomes from its FRs and the P03 flows (happy, alternate, error, empty). Each outcome becomes a story.
 2. **Edge-case analysis.** Before writing any acceptance criterion, list each feature's edge cases with the checklist below. For each, look for the expected behavior in the PRD and the UX file. Where none defines it, propose a behavior on the confirm sheet (questionnaire step 3). Record every edge case in the feature's register.
-3. **Acceptance criteria.** Only now write them: the happy path, every edge case with a defined behavior (citing its EC ID), the error, empty, and loading states, and, for changed features, the existing behavior that must not change (marked "unchanged").
-4. **Handshake and dependencies.** Fill each story's product handshake, its Depends on, and its dependency level.
-5. **Handoff.** Check every story against the ready-for-dev definition, then write the handoff section.
+3. **Acceptance criteria.** Only now write them: the happy path, every edge case with a defined behavior (citing its EC ID), the error, empty, and loading states, and, for changed features (especially brownfield), the existing behavior that must not change (marked "unchanged").
+4. **Handshake and dependencies.** Fill each story's product handshake and its Depends on (story IDs and/or existing released feature IDs). Derive dependency levels with `pdlc.py lint --fix`. **Draft and list stories in dependency order: Level 0 first, then 1, then N** — never feature-ID order when that disagrees with deps. Section 5 of the output must match each story's `depends_on` in `tracker.yaml`.
+5. **Handoff.** Check every story against the ready-for-dev definition, then write the handoff section. Do not mark a story ready for build while an upstream story it Depends on is still below `ready_for_dev` (lint enforces this).
 
 **Edge-case checklist** (use it to find edge cases, never to decide their behavior):
 - **Input:** empty, minimum and maximum lengths and values, invalid formats, special characters and emoji, duplicates, pasted or bulk input.
@@ -128,10 +129,10 @@ Scope, features covered (all of them, or the ones the person put out of scope wi
 (register table above)
 ## 4. Stories by feature
 ### Feature M01.S01.F01 [name]
-(stories in the template above)
+(stories in the template above — within each feature, and across the file, order stories by dependency level ascending)
 ## 5. Dependency order
 | Dep level (from `pdlc.py lint`) | Stories | Depends on |
-Level 0 depends on nothing still to be built; each later level depends only on lower levels. No dates or durations.
+Level 0 depends on nothing still to be built (or only on released / existing features); each later level depends only on lower levels. No dates or durations. This table must agree with each story's `depends_on` in `tracker.yaml`.
 ## 6. Touchpoints
 ## 7. Coverage
 | Feature / FR / flow / edge case / existing behavior | Stories and AC IDs | Gap? |
@@ -153,6 +154,8 @@ Level 0 depends on nothing still to be built; each later level depends only on l
 - Every "must not change" item in PRD section 6 for this scope has an "unchanged" acceptance criterion.
 - Every story is in AAU form, free of implementation detail, with acceptance criteria, a source, and a product handshake.
 - Dependencies have no cycles, and the dependency order contains no dates, durations, or sprints.
+- Stories are written and listed Level 0 → N; section 5 matches `tracker.yaml` `depends_on`.
+- Brownfield: every "must not change" PRD item for this scope has an "unchanged" AC; greenfield: that set may be empty when nothing exists yet.
 - Every story ends with its empty design-refs block. In update mode, existing design-refs blocks are kept exactly as they are, because design steps own them; a story whose screens change is noted in the change log so G02 refreshes its references.
 
 ## Tracker

@@ -103,6 +103,7 @@ Product decides what; Design decides how it looks; Development decides how it is
 **Stage flags** in `tracker.yaml` `config` (default off unless the matching setup file is approved):
 | Flag | When true / values |
 |---|---|
+| `product_mode` | `greenfield` \| `brownfield` — set in P00; brownfield protects Live behavior with "unchanged" ACs |
 | `design_stage` | Design team (G00–G04) is in the chain |
 | `design_system` | `planned` \| `adopt` \| `refine` \| `create` \| `none` — G04 status; unset means no foundation gate (legacy) |
 | `design_system_foundation` | `pending` \| `approved` — Phase 0 done (or Adopt with a fit library). Required before G02 when `design_system` is `planned`, `create`, or `refine` |
@@ -111,6 +112,10 @@ Product decides what; Design decides how it looks; Development decides how it is
 | `security_stage` | Security engagements (S00–S05) run; production promote needs a Security Go |
 
 **Design foundation gate.** When `design_system` is `planned`, `create`, or `refine`, story-level G02 (and lint of in-design / G02 work) requires `design_system_foundation: approved`. When `adopt` or `none`, the gate does not block G02. `pdlc.py lint` and `next` enforce this.
+
+**Thin path (greenfield).** A new product may keep `design_stage` off and run P00 → P02 → P04 (UX n/a where there are no screens) → Dev until the first UI scope. When `design_stage` turns on, the design foundation gate applies. Brownfield products set `product_mode: brownfield` and always record what must not change.
+
+**Upstream-ready (stories).** A story in `ready_for_dev`, `in_progress`, `in_review`, or `in_qa` may depend only on stories that are already handed off (`ready_for_dev` or later) or on map items that are `done` / `released`. Same-scope design (`in_design`) is not blocked by this rule. `pdlc.py lint` enforces it.
 
 When a stage is off, Development keeps the overlapping work (D05 for product-level QA and release Go; D06 for deploy/incident). Skills on both sides must state this handoff; do not run both full paths for the same release.
 
@@ -378,6 +383,7 @@ Every chain file starts with the front matter shown in the core and ends with a 
 # tracker.yaml
 product: Ledgerly
 config:
+  product_mode: brownfield      # greenfield | brownfield (P00)
   design_stage: true            # Design team G00–G04
   design_system: planned        # planned | adopt | refine | create | none
   design_system_foundation: pending  # pending | approved (G04 Phase 0 / Adopt unlock)
@@ -441,10 +447,11 @@ change_requests:
 - **Ready for dev (story):**
   - every edge case it lists has a defined behavior covered by an acceptance criterion
   - its acceptance criteria are complete, and no blocking question is Open
-  - its dependencies are known and its product handshake is complete
+  - its dependencies are known, its product handshake is complete, and every upstream story it Depends on is already handed off (`ready_for_dev` or later) — or every upstream map item is `done` / `released`
   - the screens it cites are in an approved UX file (or UX is n/a)
   - its stories file is approved
   - with a design stage and screens: the scope's G03 is approved and its design references are present and not stale
+  - stories are drafted Level 0 → N so handoff order matches `depends_on`
 - **Definition of done (story):**
   - every task and sub-task is done
   - every test case for its acceptance criteria and edge cases passes (D05)

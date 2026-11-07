@@ -11,7 +11,7 @@ updated: 2026-10-01
 ---
 # Product context: Ledgerly (fictional sample)
 ## 1. Product card
-Docs location: this folder (sample). Code repositories: web, api (sample). Label: Provided.
+Product mode: brownfield. Docs location: this folder (sample). Code repositories: web, api (sample). Label: Provided.
 ## 3. Product map
 | ID | Level | Name | Status | Label |
 |---|---|---|---|---|

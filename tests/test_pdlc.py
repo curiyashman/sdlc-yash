@@ -101,6 +101,32 @@ class TestLint(Base):
         e, _, _ = self.lint()
         self.assertTrue(any("US09" in m for m in e), e)
 
+    def test_upstream_not_ready_blocks_ready_for_dev(self):
+        # US02 is ready_for_dev and depends on US01; demote US01 below handed-off.
+        self.edit(TR, "title: Select draft invoices\n    status: in_review",
+                  "title: Select draft invoices\n    status: in_design")
+        e, _, _ = self.lint()
+        self.assertTrue(
+            any("upstream story M01.S02.F01-US01" in m and "ready_for_dev or later" in m for m in e),
+            e,
+        )
+
+    def test_upstream_gate_skips_in_design_consumer(self):
+        # Both still in design: consumer is not gated.
+        self.edit(TR, "title: Select draft invoices\n    status: in_review",
+                  "title: Select draft invoices\n    status: in_design")
+        self.edit(TR, "title: Send selected invoices\n    status: ready_for_dev",
+                  "title: Send selected invoices\n    status: in_design")
+        e, _, _ = self.lint()
+        self.assertFalse(any("upstream story" in m for m in e), e)
+
+    def test_upstream_released_feature_ok(self):
+        self.edit(TR, "depends_on: [M01.S02.F01-US01]", "depends_on: [M01.S01.F01]")
+        self.edit(TR, "depends_on: [M01.S01.F01]\n    dep_level: 1",
+                  "depends_on: [M01.S01.F01]\n    dep_level: 0")
+        e, _, _ = self.lint()
+        self.assertFalse(any("upstream" in m for m in e), e)
+
     def test_blocking_query_warns(self):
         self.edit(TR, "blocking: false\n    status: answered", "blocking: true\n    status: open")
         _, w, _ = self.lint()

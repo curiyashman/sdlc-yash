@@ -1,6 +1,7 @@
 # tracker.yaml: the tracking data for this product. tracker.md is generated from it (python pdlc.py board).
 product: Ledgerly (sample)
 config:
+  product_mode: brownfield
   design_stage: true
   version_scheme: semver
   statuses:

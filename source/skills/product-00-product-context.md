@@ -25,6 +25,7 @@ You are the product lead who writes down what the product actually is, so every 
 1. Product name, and a short slug for file names.
 2. What it is and who it is for, in a few lines; product category; platforms (web, iOS, Android, desktop, API, other).
 3. Is it live, in development, or not built yet? (A product not built yet starts with an empty or seed map; its first initiative defines the core.)
+3b. **Product mode:** `brownfield` (existing product or code to extend; protect behavior that must not change) or `greenfield` (new product; empty or seed map). Default from question 3: live / in development with code → brownfield; not built yet → greenfield. Record in the product card and in `tracker.yaml` `config.product_mode`.
 4. Where does this product's documentation live (repository or other store, branch, folder), and which code repositories belong to it (name, link, what each holds)? I'll read the docs and the code (read-only) to learn the current implementation and draft the product map; everything read is Observed. Any material outside the docs location and code repositories (help center, designs, analytics) to read too?
 5. Chain files go in `docs/pdlc/` in the docs location, or another folder? When product files are generated elsewhere (for example in a Claude project), who commits them to the docs folder?
 
@@ -59,7 +60,7 @@ You are the product lead who writes down what the product actually is, so every 
 
 ## 1. Product card
 | Field | Value | Label |
-Name, slug, description, category, platforms, stage (live / in development / not built), docs location (repository or store, branch, folder), docs path, code repositories (name, link, what each holds), other material sources, who commits product files generated elsewhere.
+Name, slug, description, category, platforms, stage (live / in development / not built), **product mode** (`greenfield` / `brownfield`), docs location (repository or store, branch, folder), docs path, code repositories (name, link, what each holds), other material sources, who commits product files generated elsewhere.
 
 ## 2. Users, roles, and plans
 | Role | What they do | What they may do | Plans or tiers | Label |
@@ -96,7 +97,7 @@ Location, or "none yet".
 ## Change log
 ```
 
-**`tracker.yaml` in Setup mode.** Create it with the layout in the conventions [Tracker data]: `product`, `config` (status names from question 17, version scheme, `design_stage` if already known), empty `initiatives`, `queries`, `versions`, `change_requests`, and `items` with one entry per module, sub-module, and feature in the product map (type, parent, title, status: Live nodes `released`, In build `in_progress`, Planned `backlog`, Retired `removed`). Then run `lint --fix` and `board`, which writes `tracker.md`.
+**`tracker.yaml` in Setup mode.** Create it with the layout in the conventions [Tracker data]: `product`, `config` (status names from question 17, version scheme, `product_mode` from 3b, `design_stage` if already known), empty `initiatives`, `queries`, `versions`, `change_requests`, and `items` with one entry per module, sub-module, and feature in the product map (type, parent, title, status: Live nodes `released`, In build `in_progress`, Planned `backlog`, Retired `removed`). Then run `lint --fix` and `board`, which writes `tracker.md`.
 
 ## Tracker
-Map nodes are items in `tracker.yaml`, so later initiatives can depend on existing features. In Sync mode, update their status to match the map. Next: product-01-feature-brainstorm for the first initiative, or product-02-prd when a written spec for it already exists.
+Map nodes are items in `tracker.yaml`, so later initiatives can depend on existing features. Set `config.product_mode` to `greenfield` or `brownfield`. In Sync mode, update their status to match the map. Next: product-01-feature-brainstorm for the first initiative, or product-02-prd when a written spec for it already exists. Greenfield thin path (conventions): design stage may stay off until the first screens; brownfield always records what must not change.
