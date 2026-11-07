@@ -182,6 +182,35 @@ class TestLevelsNextIds(Base):
         nx = pdlc.compute_next(pdlc.Docs(self.root), "design")["design"]
         self.assertTrue(any(x == "design-04-design-system" for x, _, _ in nx), nx)
 
+    def test_foundation_gate_blocks_g02_in_next(self):
+        # Create without foundation → G04 Phase 0, never story-level G02.
+        self.edit(TR, "  design_stage: true\n",
+                  "  design_stage: true\n  design_system: create\n  design_system_foundation: pending\n")
+        self.edit(TR, "    status: ready_for_dev\n", "    status: in_design\n")
+        d = os.path.join(self.root, "design")
+        open(os.path.join(d, "04-design-system.md"), "w").write(
+            '---\npdlc_step: "G04"\nscope: product\ndoc_version: 1.0.0\nstatus: approved\n'
+            'depends_on: [design/00-design-setup.md@1.0.0]\nopen_items: 0\nblocking: []\n'
+            'updated: 2026-10-18\n---\n# Design system\n')
+        nx = pdlc.compute_next(pdlc.Docs(self.root), "design")["design"]
+        self.assertTrue(
+            any(x == "design-04-design-system" and "foundation" in why for x, _, why in nx), nx)
+        self.assertFalse(any(x == "design-02-screen-mockups" for x, _, _ in nx), nx)
+        # Opening the gate clears the foundation blocker from next.
+        self.edit(TR, "  design_system_foundation: pending\n",
+                  "  design_system_foundation: approved\n")
+        nx = pdlc.compute_next(pdlc.Docs(self.root), "design")["design"]
+        self.assertFalse(
+            any(x == "design-04-design-system" and "foundation" in why for x, _, why in nx), nx)
+
+    def test_foundation_gate_lint_errors_when_g02_early(self):
+        self.edit(TR, "  design_stage: true\n",
+                  "  design_stage: true\n  design_system: refine\n")
+        # Sample already has a G02 mockups file — gate must flag it.
+        e, w, _ = self.lint()
+        self.assertTrue(
+            any("foundation gate" in m or "design_system_foundation" in m for m in e), e)
+
     def test_next_product_when_stories_draft(self):
         self.edit(STORIES, "status: approved", "status: draft")
         nx = pdlc.compute_next(pdlc.Docs(self.root), "product")["product"]

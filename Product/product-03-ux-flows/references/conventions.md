@@ -50,7 +50,7 @@ This file holds the full rules that the PDLC core in each SKILL.md summarizes. R
 ## Flow
 
 - **Product:** P00 once. Then, per initiative, P01 and P02. Then, per scope, P03 and P04.
-- **Design** (when the product has a design stage): G00 once. G04 once, optional (the design system; its approved phases are built by development as M00 foundations). Then G01 per initiative, then G02 and G03 per scope.
+- **Design** (when the product has a design stage): G00 once. G04 when a design system is needed (`config.design_system` not `none`): audit/proposal, then **foundation phase** (foundations, core atoms, page shells/templates) before story-level screens when the verdict is Create or Refine; Adopt may open the foundation gate immediately. Development builds approved G04 phases as M00 foundations. Then G01 per initiative, then G02 and G03 per scope (G02 waits on the foundation gate when it applies).
 - **Development:** D00 and the D01 baseline once. Then D01 per initiative. Per handed-off scope:
   1. D02, the data model.
   2. D05 in test-design mode: developer-level test cases (unit, integration, contract) from acceptance criteria, edge cases, and threats, before any code.
@@ -101,12 +101,16 @@ The skills name no repository. Every product has its own locations, and every ru
 Product decides what; Design decides how it looks; Development decides how it is built and tests it at developer level; QA decides whether the product meets its requirements independently; Deployment decides how it is released and run; Security decides how safe it is from outside the other teams' context. Each team writes only in its own folder (`product/`, `design/`, `dev/`, `qa/`, `deploy/`, `security/`). Any team may write to `tracker.yaml` and `decisions/`. Design steps may also write the design reference fields in product files. Nobody guesses about another team's area: a gap becomes a query (`Q-001`) in `tracker.yaml`. Only product-05-change-request changes an approved requirement, flow, story, edge case, or acceptance criterion.
 
 **Stage flags** in `tracker.yaml` `config` (default off unless the matching setup file is approved):
-| Flag | When true |
+| Flag | When true / values |
 |---|---|
 | `design_stage` | Design team (G00–G04) is in the chain |
+| `design_system` | `planned` \| `adopt` \| `refine` \| `create` \| `none` — G04 status; unset means no foundation gate (legacy) |
+| `design_system_foundation` | `pending` \| `approved` — Phase 0 done (or Adopt with a fit library). Required before G02 when `design_system` is `planned`, `create`, or `refine` |
 | `qa_stage` | Independent QA (Q00–Q04) owns system/E2E tests and release Go |
 | `deploy_stage` | Deployment team (O00–O05) owns environments, pipelines, release, incidents |
 | `security_stage` | Security engagements (S00–S05) run; production promote needs a Security Go |
+
+**Design foundation gate.** When `design_system` is `planned`, `create`, or `refine`, story-level G02 (and lint of in-design / G02 work) requires `design_system_foundation: approved`. When `adopt` or `none`, the gate does not block G02. `pdlc.py lint` and `next` enforce this.
 
 When a stage is off, Development keeps the overlapping work (D05 for product-level QA and release Go; D06 for deploy/incident). Skills on both sides must state this handoff; do not run both full paths for the same release.
 
@@ -375,6 +379,8 @@ Every chain file starts with the front matter shown in the core and ends with a 
 product: Ledgerly
 config:
   design_stage: true            # Design team G00–G04
+  design_system: planned        # planned | adopt | refine | create | none
+  design_system_foundation: pending  # pending | approved (G04 Phase 0 / Adopt unlock)
   qa_stage: false               # Independent QA Q00–Q04 (release Go); false = D05 owns product QA
   deploy_stage: false           # Deployment O00–O05; false = D06 owns release/incident
   security_stage: false         # Security S00–S05; false = no independent engagement gate

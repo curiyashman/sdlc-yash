@@ -392,6 +392,28 @@ class Docs:
         d = self.files.get("design/00-design-setup.md")
         return bool(d and d["fm"] and d["fm"].get("status") == "approved")
 
+    def design_system_mode(self):
+        """Return config.design_system as a lowercase string, or '' if unset."""
+        cfg = self.tracker.get("config") or {}
+        return str(cfg.get("design_system") or "").strip().lower()
+
+    def design_foundation_gate_required(self):
+        """True when story-level G02 must wait on design_system_foundation."""
+        return self.design_system_mode() in ("planned", "create", "refine")
+
+    def design_foundation_ready(self):
+        """True when G02 may run under the foundation gate rules."""
+        mode = self.design_system_mode()
+        if mode in ("", "none", "adopt"):
+            return True
+        if not self.design_foundation_gate_required():
+            return True
+        cfg = self.tracker.get("config") or {}
+        if str(cfg.get("design_system_foundation") or "").strip().lower() == "approved":
+            return True
+        # Adopt-shaped proposals sometimes only set design_system: adopt without the flag.
+        return mode == "adopt"
+
     def qa_stage(self):
         cfg = self.tracker.get("config") or {}
         if "qa_stage" in cfg:
@@ -733,6 +755,27 @@ def check_tracker_rules(docs, rep):
                 rep.err(src, f"{iid}: no design references, but the scope has screens and a design stage")
             elif re.search(r"\b(stale|not yet designed)\b", m.group(1)):
                 rep.err(src, f"{iid}: design references are stale or not yet designed")
+    # Design foundation gate: G02 / in_design must not proceed without Phase 0 when required.
+    if design and docs.design_foundation_gate_required() and not docs.design_foundation_ready():
+        mode = docs.design_system_mode() or "planned"
+        in_design = [str(i.get("id")) for i in docs.items
+                     if i.get("type") == "story" and i.get("status") == "in_design"]
+        if in_design:
+            sample = ", ".join(in_design[:5]) + ("…" if len(in_design) > 5 else "")
+            rep.err(
+                "tracker.yaml",
+                f"design_system is '{mode}' but design_system_foundation is not approved; "
+                f"stories in_design ({sample}) must wait for G04 Phase 0 "
+                f"(foundations, core atoms, page shells) or set design_system: adopt|none"
+            )
+        for p, d in chain.items():
+            if str((d.get("fm") or {}).get("pdlc_step")) != "G02":
+                continue
+            rep.err(
+                p,
+                f"G02 before design foundation gate: design_system is '{mode}' and "
+                f"design_system_foundation is not approved — finish design-04 Phase 0 first"
+            )
     # blocking items in files vs approval
     for p, d in chain.items():
         fm = d["fm"]
@@ -959,9 +1002,18 @@ def compute_next(docs, team=None):
     security = docs.security_stage()
     if design and not exists("G00"):
         G.append(("design-00-design-setup", "product", "design stage on, no setup file"))
-    if design and exists("G00") and not exists("G04") and \
-            str((docs.tracker.get("config") or {}).get("design_system", "")) == "planned":
-        G.append(("design-04-design-system", "product", "design system planned, no audit or proposal yet"))
+    ds_mode = docs.design_system_mode()
+    if design and exists("G00") and ds_mode in ("planned", "create", "refine", "adopt"):
+        if not exists("G04"):
+            why = ("design system planned, no audit or proposal yet" if ds_mode == "planned"
+                   else f"design_system is '{ds_mode}', no design/04-design-system.md yet")
+            G.append(("design-04-design-system", "product", why))
+        elif not ok("G04"):
+            G.append(("design-04-design-system", "product", "design system proposal not approved"))
+        elif docs.design_foundation_gate_required() and not docs.design_foundation_ready():
+            G.append(("design-04-design-system", "product",
+                      "foundation phase: foundations, core atoms, and page shells "
+                      "(set design_system_foundation: approved when done)"))
     if not exists("D00"):
         D.append(("dev-00-dev-setup", "product", "no dev setup yet"))
     if not docs.files.get("dev/architecture.md"):
@@ -1004,7 +1056,10 @@ def compute_next(docs, team=None):
             if ui and any(x.get("status") == "in_design" for x in st):
                 if not exists("G01", iid) and "G01" not in na:
                     G.append(("design-01-sitemap-flows", iid, "scopes waiting for design"))
-                if not ok("G02", iid, sid):
+                # Story-level G02 waits on the design foundation gate when required.
+                if docs.design_foundation_gate_required() and not docs.design_foundation_ready():
+                    pass  # G04 foundation already queued above
+                elif not ok("G02", iid, sid):
                     G.append(("design-02-screen-mockups", tag, "stories in design"))
                 elif not ok("G03", iid, sid):
                     G.append(("design-03-design-handoff", tag, "mockups done, handoff not approved"))

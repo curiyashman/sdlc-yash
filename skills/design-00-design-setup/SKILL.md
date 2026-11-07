@@ -162,6 +162,7 @@ Capability level and what each design step will do at that level.
 Page and frame naming, annotation conventions.
 ## 3. Design system
 Sources (library, variables, tokens, spec), themes, fonts, icons, missing-component policy. What was read and what was not.
+**Foundation path (before story-level screens):** unless the team chooses `design_system: none` or later confirms **Adopt** of a fit existing system, G04 must deliver foundations, core library, and at least one page shell/template before design-02-screen-mockups runs for feature scopes. Record that expectation here.
 ## 4. Frames
 **Platform and responsive profile** (the table from `references/responsive-platforms.md` section 1: platform, in scope, approach, size classes or breakpoints with the reason for each, orientation, input modes, native conventions followed, minimum versions, label). Grid, states shown on every screen. Every later Design step cites this table.
 ## 5. Process
@@ -171,4 +172,6 @@ Approver, review channel, which scopes go through the design stage.
 ```
 
 ## Tracker
-Set `config.design_stage: true` in `tracker.yaml` on approval (or `false` if the team decides to have no design stage). From then on, P04 approval moves the stories of scopes with screens to `in_design`. Record `config.design_system: planned` in `tracker.yaml` whenever the product has an existing design system to audit or needs a new one (`none` if the team wants no design-system work); `planned` makes pdlc-next suggest design-04-design-system, which settles Adopt, Refine, or Create. Next: design-01-sitemap-flows for an initiative whose scopes have approved P03 and P04 files, or design-02-screen-mockups for a scope when the initiative's charts already exist. `pdlc-next` shows which scopes wait for design.
+Set `config.design_stage: true` in `tracker.yaml` on approval (or `false` if the team decides to have no design stage). From then on, P04 approval moves the stories of scopes with screens to `in_design`. Record `config.design_system: planned` in `tracker.yaml` whenever the product has an existing design system to audit or needs a new one (`none` if the team wants no design-system work). `planned` makes pdlc-next suggest design-04-design-system, which settles Adopt, Refine, or Create. Leave `config.design_system_foundation` unset (or `pending`) until G04's foundation phase is approved; set it to `approved` only then (Adopt may set it immediately when the existing system is fit to build screens from).
+
+**Order after G00:** design-04-design-system (when `design_system` is not `none`) before story-level design-02-screen-mockups, except when the verdict is **Adopt** and the foundation gate is already satisfied. design-01-sitemap-flows may run once P03/P04 exist, but G02 waits on the foundation gate when it applies. `pdlc-next` shows which scopes wait for design and whether the foundation gate blocks G02.
