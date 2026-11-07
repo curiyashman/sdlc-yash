@@ -108,7 +108,7 @@ Facts about the product, its users, data, rules, scale, or environment are never
 ## Questionnaire (skip what upstream files answer)
 1. CI/CD provider(s) and runners (hosted, self-hosted, ephemeral); target repositories.
 2. Triggers: pull request, merge, tag, schedule, manual; which branch or tag builds which artifact and deploys to which environment.
-3. Required stages and gates: format, lint, unit and integration tests, static analysis, dependency and secret scanning, container or package scanning, license checks, QA gate, security gate, manual approvals.
+3. Required stages and gates: format, lint, unit and integration tests, **dependency audit (Layer 1 — npm audit / pip-audit / equivalent from D00; fail on high/critical by default)**, secret scanning, static analysis, container or package scanning, license checks, QA gate, security gate, manual approvals. Layer 1 is always on when a package manager exists; deeper Security (S00–S05) stays optional via `security_stage`.
 4. Artifact handling: registry, naming and versioning (from the version scheme), retention, promotion without rebuild, signing and provenance, software bill of materials.
 5. Credentials: how the pipeline authenticates to clouds, registries, and stores (short-lived workload identity preferred); who can change pipeline definitions.
 6. Mobile: build and sign steps, key custody, beta and store upload automation, version and build number rules.

@@ -221,7 +221,16 @@ Reviewing every line an agent writes doesn't scale. Development reviews the **sp
    - the tasks and their change budgets
 
    D03 is approved only when this review is signed. It is the gate for D04.
-3. **Sandbox build (D04).** The coding agent works in an isolated working copy, branch, or container, with no production credentials and no access to production data. It iterates until every required check passes: the approved tests, lint and type checks, the change budget, and the reuse map. Approved tests are read-only to the agent. Changing, skipping, or weakening one needs the reviewers' approval again, recorded in the plan.
+3. **Sandbox build (D04).** The coding agent works in an isolated working copy, branch, or container, with no production credentials and no access to production data. It iterates until every required check passes: the approved tests, lint and type checks, the **dependency audit** (below), the change budget, and the reuse map. Approved tests are read-only to the agent. Changing, skipping, or weakening one needs the reviewers' approval again, recorded in the plan.
+
+## Dependency audit (Layer 1)
+
+Default on for every product with a package manager. This is **not** a Security engagement (S00–S05); it is a development and CI check so known vulnerable dependencies are not ignored while building.
+
+- **Record in D00** which command runs per repository (Observed from the package manager): e.g. `npm audit`, `pnpm audit`, `yarn npm audit`, `pip-audit`, `cargo audit`, `go vuln`, or the monorepo equivalent. Record the **fail bar** (default: high and critical) and how exceptions are logged (a `UPG-` item or DEC with expiry).
+- **While developing (D04):** before the story or upgrade is marked ready to merge, run that audit on every repository the change touches (or the workspace root in a monorepo). New **high/critical** findings introduced or left unaddressed block finish unless an exception is recorded. Prefer fixing or bumping in the same PR when the install list allows; otherwise open `dev-07` upgrade items.
+- **CI:** include the same audit as a required check when CI exists (D00 / O02 / D06). Docs-only PRs may skip it.
+- **Security stage** remains optional for deeper audits; Layer 1 does not replace it.
 4. **Risk-tiered human review.** Reviewers don't re-read all generated code. They check:
    - that tests were not weakened
    - every change-budget exception and every new module, helper, or package

@@ -34,7 +34,7 @@ You are a staff engineer who keeps the product healthy. Not all work starts from
 4. Could any user-visible behavior change? If yes, which, and has product been asked?
 5. Risk if left as it is, and risk of the change. Use the team's scale or a proposed default (low, medium, high), confirmed.
 6. For a spike: the one question it must answer, what counts as an answer, and its time box (team-set).
-7. For an upgrade: from and to versions (Reference, cited release notes and dates), breaking changes, and what must be re-tested.
+7. For an upgrade: from and to versions (Reference, cited release notes and dates), breaking changes, and what must be re-tested. Dependency-audit findings (npm audit / pip-audit / etc.) that need a bump become `UPG-` items here when not fixed in the story PR that found them.
 8. For a hotfix: the shortened path the team accepts (for example skip pre-production with a named approver), and what is completed after release (tests, root cause, documents).
 
 ## Output: `dev/maintenance/<id>-<slug>.md`

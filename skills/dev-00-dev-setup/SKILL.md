@@ -133,6 +133,7 @@ Facts about the product, its users, data, rules, scale, or environment are never
 
 **Step 5: Delivery and access**
 8. CI/CD already in place (provider, what runs), or none yet? (Set up or changed by dev-06-deploy in Setup mode.)
+8a. **Dependency audit (Layer 1, default on).** For each code repository (or the monorepo root), which audit command matches the package manager (Observed: `npm audit`, `pnpm audit`, `yarn npm audit`, `pip-audit`, `cargo audit`, `govulncheck`, etc.)? Fail bar (default: high and critical)? Is it a required CI check today? Exceptions: logged as `UPG-` / DEC with expiry (conventions [Dependency audit]).
 9. Secrets manager and how local configuration is shared, or "none yet".
 10. Local setup: what a developer needs to run the product locally (access, seed data, services), or Open.
 
@@ -169,6 +170,9 @@ Branch naming, commit format, pull request and review rules, merge rights, requi
 ## 6. Delivery and access
 CI/CD in place, secrets handling, local setup steps or Open.
 
+**Dependency audit (Layer 1):**
+| Repository | Package manager | Audit command | Fail bar | In CI? | Exception path | Label |
+
 ## 7. Team, approvals, and queries
 | Role | Person | Approves or handles |
 
@@ -186,6 +190,7 @@ Development docs live in [docs path]/dev/; the shared tracker is [docs path]/tra
 Before planning or coding, read [docs path]/dev/00-dev-setup.md, [docs path]/dev/architecture.md,
 and the 03-tasks file for your scope under [docs path]/dev/<initiative folder>/.
 Build with the dev-04-code-plan-build skill: plan first, wait for approval, then implement.
+Before merge, run the dependency audit recorded in section 6 of this file (npm audit or equivalent); high/critical findings need a fix or a logged UPG-/DEC exception.
 Questions about product behavior go to the queries in [docs path]/tracker.yaml; never edit product docs.
 After changing docs or task status, run: python [docs path]/.pdlc/pdlc.py lint --fix --root [docs path], then board.
 ```
