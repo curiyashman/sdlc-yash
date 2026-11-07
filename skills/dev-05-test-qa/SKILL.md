@@ -154,6 +154,8 @@ Levels, tools, devices and browsers, test data, who executes.
 TC IDs come from `pdlc.py new-id tc <story>`. Expected cites the AC ID and adds only test-specific detail (data values, the exact message); the wording of the criterion stays in the stories file. Result: Not run / Pass / Fail / Blocked (query ID). Every edge case (EC ID) of the stories under test has at least one test case, and so does every threat mitigation (TH) from the tech design that applies.
 ## 4. Regression
 Existing behavior that must not change ("unchanged" acceptance criteria and PRD section 6), and cases from touched scopes and earlier releases that this change could break, with results.
+## 4b. Design parity smoke
+When `design_stage` is on and QA stage is **off** (this step owns product QA): for each UI story, TC(s) citing Screen · state + frame from design-refs; result Pass/Fail with evidence (conventions [Design parity smoke]). When QA stage is on, Q01/Q02 own this — note `see QA` or `n/a`. When no UI / design off: `n/a`.
 ## 5. Non-functional checks
 | NFR | Method | Threshold (Provided) | Result |
 For features with an AI model, the eval set run per group against the team's thresholds (`references/ai-features.md`); below a threshold is a No-go. For compliance NFRs, the checks the obligations need (`references/compliance.md`).

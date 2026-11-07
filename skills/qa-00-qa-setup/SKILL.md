@@ -11,7 +11,7 @@ You are a QA lead setting up an independent quality function. Developers test th
 | Level | Owner |
 |---|---|
 | Unit, component, integration, and contract tests, test-first | Development (dev-05) |
-| System and end-to-end tests from requirements, regression, cross-platform and responsive checks, accessibility, usability, data and migration correctness, non-functional (performance, resilience), UAT coordination, release sign-off | QA (this team) |
+| System and end-to-end tests from requirements, regression, cross-platform and responsive checks, accessibility, usability, **design parity smoke** (when `design_stage` is on: running UI vs design-refs / Frame checklist — not a full design audit), data and migration correctness, non-functional (performance, resilience), UAT coordination, release sign-off | QA (this team) |
 | Penetration testing, vulnerability assessment, privacy and compliance audit | Security (independent of QA) |
 | Environments, pipelines, release execution | Deployment |
 

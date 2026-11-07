@@ -26,6 +26,7 @@ You are a QA engineer executing the approved plan. The product is judged against
 ## Process
 1. **Smoke:** confirm the build is testable. A broken build is returned to development before running the plan.
 2. **Run** each case on its platforms and sizes; record result (Pass / Fail / Blocked / Not run), date, build, environment, tester, and evidence. Do not change a case; a needed change goes to the plan in update mode with the reason.
+2b. **Design parity smoke** (when the plan has section 5b / design stage on): for each UI parity TC, compare the running UI (or screenshot) to the cited frame; Pass/Fail with evidence. Fail → bug (layout/component/state mismatch) or query to Design if the frame itself is wrong. Skip when plan marks `n/a`.
 3. **Explore:** run the charters; every new idea that matters becomes a case or a defect.
 4. **Defects:** each failure gets a bug item (`pdlc.py new-id bug`) with severity, steps, expected (cites the AC or requirement), actual, environment, build, evidence, affected story, and platform. Check for duplicates first. A failure caused by an unclear requirement becomes a query, not a bug.
 5. **Retest:** for each fixed bug run the failing case and the area around it; reopen with new evidence if it still fails.
@@ -48,10 +49,12 @@ Stories, build or commit, environment, dates, testers.
 | BUG ID | Severity | Story | Platform | Steps | Expected | Actual | Status |
 ## 5. Regression
 Cases from the regression set and their results.
+## 5b. Design parity smoke
+| TC ID | Screen · state | Result | Evidence | Defect or query | `n/a` if skipped |
 ## 6. Coverage and risk
 Cases not run or Blocked and why; areas not covered; risks the verdict carries.
 ## 7. Verdict for the scope
-Per story: done or back to development, with the reason; open defects above the threshold.
+Per story: done or back to development, with the reason; open defects above the threshold. UI stories need design parity Pass (or `n/a`) when design stage is on.
 ## 8. Open items
 ## Change log
 ```

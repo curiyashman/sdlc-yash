@@ -231,6 +231,16 @@ Default on for every product with a package manager. This is **not** a Security 
 - **While developing (D04):** before the story or upgrade is marked ready to merge, run that audit on every repository the change touches (or the workspace root in a monorepo). New **high/critical** findings introduced or left unaddressed block finish unless an exception is recorded. Prefer fixing or bumping in the same PR when the install list allows; otherwise open `dev-07` upgrade items.
 - **CI:** include the same audit as a required check when CI exists (D00 / O02 / D06). Docs-only PRs may skip it.
 - **Security stage** remains optional for deeper audits; Layer 1 does not replace it.
+
+## Design parity smoke (QA)
+
+When `design_stage` is on and a story has visible UI, independent QA includes a **thin design check** — not a second G03.
+
+- **Plan (Q01, or D05 when QA stage is off):** for each UI story, at least one TC that cites Screen · state (and frame link from design-refs / G03). Expected = matches the handoff frame for layout, key components, and that state — not a redesign review.
+- **Execute (Q02 / D05 results):** compare the running UI (or screenshot) to the Frame checklist / design-refs; Fail → bug (or query to Design if the frame is wrong). Record evidence.
+- **Release (Q03):** smoke the design-parity TCs for UI stories in the version when design stage is on.
+- **Out of scope for this check:** design-system audits, full a11y deep-dives, token inventories (those stay in G03/G04 and dedicated a11y cases).
+- **`design_stage` off or `no visible change`:** skip; mark `n/a`.
 4. **Risk-tiered human review.** Reviewers don't re-read all generated code. They check:
    - that tests were not weakened
    - every change-budget exception and every new module, helper, or package

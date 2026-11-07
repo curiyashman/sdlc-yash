@@ -32,6 +32,7 @@ You may start as soon as a scope's stories are approved, in parallel with the bu
 2. **Approach per area:** technique (equivalence and boundary, decision table, state transition, journey, exploratory charter, and so on), depth by risk, manual or automated.
 3. **Cases:** each case implements one check, carries a TC ID (`pdlc.py new-id tc <story>`), covers one or more requirement IDs, and has preconditions, steps, expected result (cites the AC, adds only test-specific values), platform and size coverage, data, and priority. Every EC has at least one case.
 4. **Cross-cutting sets:** accessibility cases (keyboard, screen reader, zoom, contrast, target size), responsive and platform cases from the design profile, localization, permission matrix per role, session and error behavior, privacy flows (consent, withdrawal, export, deletion), and AI eval cases where applicable.
+4b. **Design parity smoke** (when `config.design_stage: true` and the story has UI; conventions [Design parity smoke]): for each UI story, add at least one TC that cites Screen · state and the frame link from design-refs / G03. Expected = the running UI matches that frame for layout, key components, and state. Skip with `n/a` when design stage is off or design-refs say `no visible change`. Do not re-audit the design system here.
 5. **Regression set:** behavior that must not change and neighbouring scopes this change could break, from earlier plans.
 6. **Traceability:** a matrix from each requirement ID to its cases, with no uncovered requirement and no case without a requirement.
 7. **Review:** play back the plan summary (counts by type, risk, platform), get product review of the expected results, and approval.
@@ -51,6 +52,9 @@ Stories, risks, techniques, exclusions with reasons, entry and exit criteria (Pr
 | TC ID | Covers (AC, EC, FR, NFR, UX state) | Technique | Preconditions | Steps | Expected | Platforms | Priority | Automated? |
 ## 5. Cross-cutting cases
 Accessibility, responsive, localization, permissions, privacy flows, AI eval, in the same table shape (TC IDs).
+## 5b. Design parity smoke
+| TC ID | Story | Screen · state | Frame link (design-refs) | Expected (match frame) | Platforms | `n/a` if no design stage / no UI |
+Required when design stage on; else one row `n/a`.
 ## 6. Regression set
 ## 7. Traceability
 | Requirement ID | Test cases | Uncovered? |
@@ -65,7 +69,7 @@ Accessibility, responsive, localization, permissions, privacy flows, AI eval, in
 - Parallel with build: plan may be approved before code exists; do not derive cases from implementation.
 
 ## Done when
-Every in-scope AC/blocking EC has a TC or explicit `na`; each TC cites requirement IDs; matrix cells marked; data/accounts listed; file approved; queries filed for gaps.
+Every in-scope AC/blocking EC has a TC or explicit `na`; each TC cites requirement IDs; matrix cells marked; design parity smoke TCs present when design stage + UI (or `n/a`); data/accounts listed; file approved; queries filed for gaps.
 
 ## Tracker
 Add the queries this run raises (`to: product` for unclear expectations, `to: design` for missing states). Next: qa-02-test-execution when the scope's stories reach `in_qa`. Developers may read this plan to build in the knowledge of what QA will check.

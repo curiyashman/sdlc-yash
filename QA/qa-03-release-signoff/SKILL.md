@@ -115,7 +115,7 @@ Facts about the product, its users, data, rules, scale, or environment are never
 ## Process
 1. **Entry check:** every scope in the version has a passing Q02 result at the current versions of its inputs; stale results are rerun. Non-functional checks the NFRs require have results (Q04) or an explicit exception.
 2. **Regression selection:** the regression set from the plans of every scope in the version, plus the cross-release suite, chosen by risk and by what changed. State what is not run and why.
-3. **Run** on the staged build: smoke, regression, key journeys on every platform and size class in the matrix, upgrade and data-migration checks, accessibility spot-checks, and the AI eval set where applicable. Record results with evidence.
+3. **Run** on the staged build: smoke, regression, key journeys on every platform and size class in the matrix, upgrade and data-migration checks, accessibility spot-checks, **design parity smoke** for UI stories when `design_stage` is on (conventions [Design parity smoke]), and the AI eval set where applicable. Record results with evidence.
 4. **UAT:** collect product's acceptance per scenario; no acceptance is assumed.
 5. **Defects:** list all open defects by severity against the exit criteria. A defect above the threshold is a No-go unless the named owner accepts the risk, in writing.
 6. **Verdict:** **Go**, **Go with conditions** (each condition and its owner), or **No-go**, with reasons. Leave the verdict to evidence; do not soften it.
@@ -133,6 +133,8 @@ Version, contents (tracker IDs), environment, build, migrations, flags, date.
 | Scope | Q02 result | Current? | Notes |
 ## 3. Regression and smoke
 | Area | Cases run | Pass | Fail | Not run (reason) |
+## 3b. Design parity smoke
+| Story / TC | Screen · state | Result | Evidence | `n/a` if design off / no UI |
 ## 4. Platform and size results
 | Platform | Versions or size classes | Result | Notes |
 ## 5. Non-functional results
